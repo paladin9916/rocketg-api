@@ -18,7 +18,7 @@ staging:
   - gem install dpl
   - dpl --provider=heroku --app=gitlab-ci-python-test-staging --api-key=$HEROKU_STAGING_API_KEY
   only:
-  - integration
+  - master
 
 production:
   stage: deploy
@@ -28,4 +28,4 @@ production:
   - gem install dpl
   - dpl --provider=heroku --app=gitlab-ci-python-test-prod --api-key=$HEROKU_PRODUCTION_API_KEY
   only:
-  - integration
+  - master
