@@ -7,7 +7,7 @@ integration:
   - apt-get update -qy
   - apt-get install -y python3-dev python3-pip
   - pip3 install -r requirements.txt
-  - python3 manage.py migrate --database=integration
+#   - python3 manage.py migrate --database=integration
   - python3 manage.py test
   - rm -rf /home/ec2-user/py-api/rocketg-api-python-integration/*
   - mv ./* /home/ec2-user/py-api/rocketg-api-python-integration/
