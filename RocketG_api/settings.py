@@ -87,25 +87,25 @@ DATABASES = {
     'integration': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'py_rocketg_integration',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
+        'USER': 'rocketg_db_1',
+        'PASSWORD': 'zxcasdQWE!@#',
+        'HOST': '47.103.37.13',
         'PORT': '3306'
     },
     'staging': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'py_rocketg_staging',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
+        'USER': 'rocketg_db_1',
+        'PASSWORD': 'zxcasdQWE!@#',
+        'HOST': '47.103.37.13',
         'PORT': '3306'
     },
     'production': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'rl_py_rocketg',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
+        'USER': 'rocketg_db_1',
+        'PASSWORD': 'zxcasdQWE!@#',
+        'HOST': '47.103.37.13',
         'PORT': '3306'
     },
 }
