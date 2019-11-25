@@ -11,9 +11,8 @@ integration:
   - source /home/ec2-user/py-api/venv/bin/activate
   - pip3 install -r /home/ec2-user/py-api/rocketg-api-python-integration/requirements.txt
   - python3 /home/ec2-user/py-api/rocketg-api-python-integration/manage.py makemigrations
-  - python3 /home/ec2-user/py-api/rocketg-api-python-integration/manage.py migrate
+  - python3 /home/ec2-user/py-api/rocketg-api-python-integration/manage.py migrate --database=integration
   - python3 /home/ec2-user/py-api/rocketg-api-python-integration/manage.py test
-#   - python3 manage.py migrate --database=integration
   
   only:
   - integration
