@@ -80,10 +80,10 @@ WSGI_APPLICATION = 'RocketG_api.wsgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    },
+    #'default': {
+    #    'ENGINE': 'django.db.backends.sqlite3',
+    #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    #},
     'integration': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'py_rocketg_integration',
@@ -100,7 +100,7 @@ DATABASES = {
         'HOST': '47.103.37.13',
         'PORT': '3306'
     },
-    'production': {
+    'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'rl_py_rocketg',
         'USER': 'rocketg_db_1',
