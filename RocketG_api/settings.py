@@ -55,6 +55,10 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = (
+)
+
 ROOT_URLCONF = 'RocketG_api.urls'
 
 TEMPLATES = [
