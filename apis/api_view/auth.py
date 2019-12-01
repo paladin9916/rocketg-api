@@ -34,7 +34,7 @@ def signIn(request):
 
 @api_view(['DELETE'])
 def signOut(request):
-    if  request.method == 'DELETE':
+    if request.method == 'DELETE':
         token = request.headers.get('access-token')
         client = request.headers.get('client')
         uid = request.headers.get('uid')
