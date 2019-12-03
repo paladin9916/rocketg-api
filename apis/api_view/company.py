@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from apis.api_view.data_manage import getCompanyData
+from apis.api_view.utility import getCompanyData
 from apis.models import Companies
 
 
@@ -90,7 +90,6 @@ def componyUpdate(request, pk):
         company.manage = manage
         company.total_expenses = total_expenses
         company.active_employees = active_employees
-        company.save()
 
         try:
             company.save()

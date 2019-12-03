@@ -1,4 +1,5 @@
-from apis.models import Industry_locales, Country_locales
+from apis.models import Industry_locales, Country_locales, Images
+from apis.serializers import ImageSerializer
 
 
 def getUserData(users):
@@ -16,7 +17,34 @@ def getUserData(users):
             "language": user.language,
             "role_id": user.role_id,
             "avatar_url": user.avatar,
-            "company_id": user.company_id
+            "company_id": user.company_id,
+            "reimbursement_cycle": user.reimbursement_cycle,
+            "payments_currency": user.payments_currency,
+        }
+        users_data.append(user_data)
+
+    return users_data
+
+
+def getUserDataWithPW(users):
+    users_data = []
+
+    for user in users:
+        user_data = {
+            "id": user.id,
+            "firstname": user.firstname,
+            "lastname": user.lastname,
+            "email": user.email,
+            "password": user.reset_password_token,
+            "phone": user.phone,
+            "job_title": user.job_title,
+            "department": user.department,
+            "language": user.language,
+            "role_id": user.role_id,
+            "avatar_url": user.avatar,
+            "company_id": user.company_id,
+            "reimbursement_cycle": user.reimbursement_cycle,
+            "payments_currency": user.payments_currency,
         }
         users_data.append(user_data)
 
@@ -54,3 +82,16 @@ def getCompanyData(companies, lang):
         companies_data.append(company_data)
 
     return companies_data
+
+
+def uploadImage(userId, imageInfo):
+    try:
+        image = Images.objects.get(user_id=userId)
+        image_serializer = ImageSerializer(image, data=imageInfo)
+    except Images.DoesNotExist:
+        image_serializer = ImageSerializer(data=imageInfo)
+
+    if image_serializer.is_valid():
+        image_serializer.save()
+
+    return image_serializer
