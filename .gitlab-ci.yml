@@ -6,8 +6,8 @@ integration:
   script:
   - sudo apt-get update -qy
   - sudo apt-get install -y python3-dev python3-pip
-  - rm -rf /home/ec2-user/py-api/rocketg-api-python-integration/*
-  - mv ./* /home/ec2-user/py-api/rocketg-api-python-integration/
+  - sudo rm -rf /home/ec2-user/py-api/rocketg-api-python-integration/*
+  - sudo mv ./* /home/ec2-user/py-api/rocketg-api-python-integration/
   - source /home/ec2-user/py-api/venv/bin/activate
   - pip3 install -r /home/ec2-user/py-api/rocketg-api-python-integration/requirements.txt
   - python3 /home/ec2-user/py-api/rocketg-api-python-integration/manage.py makemigrations
