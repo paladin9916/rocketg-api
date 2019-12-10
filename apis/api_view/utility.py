@@ -1,4 +1,4 @@
-from apis.models import Industry_locales, Country_locales, Images
+from apis.models import Industry_locales, Country_locales, Images, Countries
 from apis.serializers import ImageSerializer
 
 
@@ -19,8 +19,14 @@ def getCountryData(countryList):
     countries_data = []
 
     for country in countryList:
+        countryCode = Countries.objects.get(id=country.country_id)
+        if countryCode is None:
+            code = ''
+        else:
+            code = countryCode.code
         country_data = {
             "id": country.country_id,
+            "code": code,
             "name": country.name,
         }
         countries_data.append(country_data)
