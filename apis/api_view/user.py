@@ -21,12 +21,20 @@ def userGetSave(request):
         lang = 'en'
 
     if request.method == 'GET':
-        page = int(request.query_params.get('page'))
-        perPage = int(request.query_params.get('per_page'))
+        page_str = request.query_params.get('page')
+        perPage_str = request.query_params.get('per_page')
         companyId = int(request.query_params.get('company_id'))
         searchKey = request.query_params.get('search_key')
-        if perPage is None or perPage == 0:
+
+        if page_str is None or page_str == '':
+            page = 0
+        else:
+            page = int(page_str)
+
+        if perPage_str is None or perPage_str == '':
             perPage = 10
+        else:
+            perPage = int(perPage_str)
 
         userList = None
         try:

@@ -19,10 +19,18 @@ def componyGetSave(request):
         lang = 'en'
 
     if request.method == 'GET':
-        page = int(request.query_params.get('page'))
-        perPage = int(request.query_params.get('per_page'))
-        if perPage is None or perPage == 0:
+        page_str = request.query_params.get('page')
+        perPage_str = request.query_params.get('per_page')
+
+        if page_str is None or page_str == '':
+            page = 0
+        else:
+            page = int(page_str)
+
+        if perPage_str is None or perPage_str == '':
             perPage = 10
+        else:
+            perPage = int(perPage_str)
 
         companyList = None
         try:

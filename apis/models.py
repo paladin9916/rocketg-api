@@ -78,18 +78,20 @@ class Images(models.Model):
 
 
 class Expenses(models.Model):
-    merchant_name = models.CharField(max_length=50, null=False, blank=True)
-    receipt_date = models.DateField()
-    description = models.CharField(max_length=50, null=False, blank=True)
-    total_amount = models.FloatField(default=0.0)
-    category = models.IntegerField(default=1)
-    assignees = models.CharField(max_length=50, null=False, blank=True)
-    file_urls = models.CharField(max_length=255, null=True, blank=True)
-    file_names = models.CharField(max_length=255, null=True, blank=True)
-    currency_type = models.IntegerField(default=1)
-    status = models.IntegerField(default=1)
+    merchant_name = models.CharField(max_length=255, null=True, blank=True)
+    receipt_date = models.DateField(null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    total_amount = models.FloatField(null=True, blank=True)
+    category = models.IntegerField(null=True, blank=True)
+    assignees = models.CharField(max_length=255, null=True, blank=True)
+    file_urls = models.TextField(null=True, blank=True)
+    file_names = models.TextField(null=True, blank=True)
     company = models.ForeignKey(Companies, on_delete=models.CASCADE, blank=True, null=True)
     user = models.ForeignKey(Users, on_delete=models.CASCADE, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    currency_type = models.IntegerField(null=True, blank=True)
+    status = models.IntegerField(null=True, blank=True)
 
 
 class Industry_locales(models.Model):

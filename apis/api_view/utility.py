@@ -2,6 +2,32 @@ from apis.models import Industry_locales, Country_locales, Images
 from apis.serializers import ImageSerializer
 
 
+def getIndustryData(industryList):
+    industries_data = []
+
+    for industry in industryList:
+        industry_data = {
+            "id": industry.industry_id,
+            "name": industry.name,
+        }
+        industries_data.append(industry_data)
+
+    return industries_data
+
+
+def getCountryData(countryList):
+    countries_data = []
+
+    for country in countryList:
+        country_data = {
+            "id": country.country_id,
+            "name": country.name,
+        }
+        countries_data.append(country_data)
+
+    return countries_data
+
+
 def getUserData(users):
     users_data = []
 
