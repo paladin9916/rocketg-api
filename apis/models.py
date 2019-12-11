@@ -94,6 +94,13 @@ class Expenses(models.Model):
     status = models.IntegerField(null=True, blank=True)
 
 
+class ExpenseFile(models.Model):
+    expense_id = models.IntegerField(default=0)
+    file = models.FileField(blank=False, null=False)
+    def __str__(self):
+        return self.file.name
+
+
 class Industry_locales(models.Model):
     name = models.CharField(max_length=50, null=True, blank=True)
     language = models.CharField(max_length=50, null=True, blank=True)

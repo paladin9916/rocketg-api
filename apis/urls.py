@@ -20,6 +20,10 @@ urlpatterns = [
     path('admin/industries', industry.industryGet),
     path('admin/countries', country.countryGet),
 
-    path('user/expenses_month', expense.expenseMonth),
-    # path('user/expenses_month', expense.expenseMonth),
+    path('user/expenses_month', expense.expenseMonthList),
+    path('user/expenses_month/<int:month>', expense.expenseByMonth),
+    path('user/expenses', expense.expenseSave),
+    path('user/expenses/<int:pk>', expense.expenseUpdate),
+    path('user/expenses/change_status', expense.expenseChangeStatus),
+    path('user/expenses/upload_file', expense.expenseUploadFile),
 ]

@@ -1,16 +1,17 @@
 import datetime
-import calendar
 
-from django.db.models import Q, Sum, Count
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from apis.api_view.utility import first_day_in_month, last_day_in_month, getMonthInfoForExpenses, \
+    getMonthInfoCountForExpenses, getMonthTotalPrice, getExpenseByMonth, getExpenseData, getExpenseDetail, \
+    uploadExpenseFile
 from apis.models import Expenses
 
 
 @api_view(['GET'])
-def expenseMonth(request):
+def expenseMonthList(request):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
@@ -19,98 +20,265 @@ def expenseMonth(request):
     if lang is None or lang == '':
         lang = 'en'
 
-    userId = int(request.query_params.get('user_id'))
-    assignerId = int(request.query_params.get('assigner_id'))
-    cycleType = int(request.query_params.get('cycle_type'))
+    if request.method == 'GET':
+        userId = int(request.query_params.get('user_id'))
+        assignerId = int(request.query_params.get('assigner_id'))
+        cycleType = int(request.query_params.get('cycle_type'))
+        wants_currency = int(request.query_params.get('wants_currency'))
+        order_by = request.query_params.get('order_by')
 
-    utc = 0.142013
-    etc = 0.127317
+        currentYear = datetime.datetime.now().year
+        month_info = []
 
-    today = datetime.datetime.now()
-    currentYear = today.year
+        for i in range(12):
+            month = i + 1
+            if cycleType == 1:
+                startDate = first_day_in_month(currentYear, month, 1)
+                endDate = last_day_in_month(currentYear, month, 1)
+                expensesByMonth = getMonthInfoForExpenses(startDate, endDate, userId, assignerId)
+                expenseCount = getMonthInfoCountForExpenses(startDate, endDate, userId, assignerId)
+                if expenseCount != 0:
+                    total = getMonthTotalPrice(expensesByMonth, wants_currency)
+                    monthHistory = {"month": month, "half": 1, "total_amount": total}
+                    month_info.append(monthHistory)
 
-    month_info = []
+                startDate = first_day_in_month(currentYear, month, 2)
+                endDate = last_day_in_month(currentYear, month, 2)
+                expensesByMonth = getMonthInfoForExpenses(startDate, endDate, userId, assignerId)
+                expenseCount = getMonthInfoCountForExpenses(startDate, endDate, userId, assignerId)
+                if expenseCount != 0:
+                    total = getMonthTotalPrice(expensesByMonth, wants_currency)
+                    monthHistory = {"month": month, "half": 2, "total_amount": total}
+                    month_info.append(monthHistory)
 
-    for i in range(12):
-        month = i + 1
-        if cycleType == 1:
-            startDate = first_day_in_month(currentYear, month, 1)
-            endDate = last_day_in_month(currentYear, month, 1)
-            expensesByMonth = getMonthInfoForExpenses(startDate, endDate, userId, assignerId)
-            expenseCount = getMonthInfoCountForExpenses(startDate, endDate, userId, assignerId)
-            if expenseCount != 0:
-                total = getMonthTotalPrice(expensesByMonth, utc, etc)
-                monthHistory = {"month": month, "half": 1, "total_amount": total}
+            else:
+                startDate = first_day_in_month(currentYear, month, 0)
+                endDate = last_day_in_month(currentYear, month, 0)
+                expensesByMonth = getMonthInfoForExpenses(startDate, endDate, userId, assignerId)
+                expenseCount = getMonthInfoCountForExpenses(startDate, endDate, userId, assignerId)
+                if expenseCount == 0:
+                    continue
+
+                total = getMonthTotalPrice(expensesByMonth, wants_currency)
+                monthHistory = {"month": month, "total_amount": total}
                 month_info.append(monthHistory)
-
-            startDate = first_day_in_month(currentYear, month, 2)
-            endDate = last_day_in_month(currentYear, month, 2)
-            expensesByMonth = getMonthInfoForExpenses(startDate, endDate, userId, assignerId)
-            expenseCount = getMonthInfoCountForExpenses(startDate, endDate, userId, assignerId)
-            if expenseCount != 0:
-                total = getMonthTotalPrice(expensesByMonth, utc, etc)
-                monthHistory = {"month": month, "half": 2, "total_amount": total}
-                month_info.append(monthHistory)
-
-        else:
-            startDate = first_day_in_month(currentYear, month, 0)
-            endDate = last_day_in_month(currentYear, month, 0)
-            expensesByMonth = getMonthInfoForExpenses(startDate, endDate, userId, assignerId)
-            expenseCount = getMonthInfoCountForExpenses(startDate, endDate, userId, assignerId)
-            if expenseCount == 0:
-                continue
-
-            total = getMonthTotalPrice(expensesByMonth, utc, etc)
-            monthHistory = {"month": month, "total_amount": total}
-            month_info.append(monthHistory)
 
     return Response(data={'success': True, 'data': month_info}, status=status.HTTP_200_OK)
 
 
-def first_day_in_month(year, month, type):
-    if type == 2:
-        return datetime.datetime(year, month, 16)
-    else:
-        return datetime.datetime(year, month, 1)
+@api_view(['GET'])
+def expenseByMonth(request, month):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+
+    if lang is None or lang == '':
+        lang = 'en'
+
+    if month is None or month == '':
+        month = 1
+
+    if request.method == 'GET':
+        status_expense = int(request.query_params.get('status'))
+        userId = int(request.query_params.get('user_id'))
+        assignerId = int(request.query_params.get('assigner_id'))
+        cycleType = int(request.query_params.get('cycle_type'))
+        wants_currency = int(request.query_params.get('wants_currency'))
+        order_by = request.query_params.get('order_by')
+
+        currentYear = datetime.datetime.now().year
+        month_info = []
+
+        if cycleType == 1:
+            startDate = first_day_in_month(currentYear, month, 1)
+            endDate = last_day_in_month(currentYear, month, 1)
+            expenses_data1 = getExpenseByMonth(startDate, endDate, userId, assignerId)
+            dataExpense_1 = getExpenseData(expenses_data1, 1)
+
+            startDate = first_day_in_month(currentYear, month, 2)
+            endDate = last_day_in_month(currentYear, month, 2)
+            expenses_data2 = getExpenseByMonth(startDate, endDate, userId, assignerId)
+            dataExpense_2 = getExpenseData(expenses_data2, 2)
+
+            month_info = dataExpense_1 + dataExpense_2
+        else:
+            startDate = first_day_in_month(currentYear, month, 0)
+            endDate = last_day_in_month(currentYear, month, 0)
+            expenses_data0 = getExpenseByMonth(startDate, endDate, userId, assignerId)
+            dataExpense_0 = getExpenseData(expenses_data0, 0)
+
+            month_info = dataExpense_0
+
+    return Response(data={'success': True, 'data': month_info}, status=status.HTTP_200_OK)
 
 
-def last_day_in_month(year, month, type):
-    lastDay = calendar.monthrange(year, month)[1]  # last day of month
-    if type == 1:
-        return datetime.datetime(year, month, 15)
-    else:
-        return datetime.datetime(year, month, lastDay)
+@api_view(['POST'])
+def expenseSave(request):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+
+    if lang is None or lang == '':
+        lang = 'en'
+
+    if request.method == 'POST':
+        merchant_name = request.data.get('merchant_name')
+        receipt_date = request.data.get('receipt_date')
+        description = request.data.get('description')
+        total_amount = request.data.get('total_amount')
+        currency_type = request.data.get('currency_type')
+        category = request.data.get('category')
+        assignees = request.data.get('assignees')
+        file_urls = request.data.get('file_urls')
+        file_names = request.data.get('file_names')
+        user_id = request.data.get('user_id')
+        company_id = request.data.get('company_id')
+        statusNum = request.data.get('status')
+
+        expense = Expenses(
+            merchant_name=merchant_name,
+            receipt_date=receipt_date,
+            description=description,
+            total_amount=total_amount,
+            currency_type=currency_type,
+            category=category,
+            assignees=assignees,
+            file_urls=file_urls,
+            file_names=file_names,
+            user_id=user_id,
+            company_id=company_id,
+            status=statusNum,
+        )
+
+        try:
+            expense.save()
+        except Expenses.DoesNotExist:
+            return Response(data={'success': False, 'error': ['Error in creating Expense.']}, status=status.HTTP_200_OK)
+
+        expenseData = getExpenseDetail([expense, ])
+
+    return Response(data={'success': True, 'data': expenseData}, status=status.HTTP_200_OK)
 
 
-def getMonthInfoForExpenses(startDate, endDate, userId, assignerId):
-    if userId:
-        expensesByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                       Q(receipt_date__lte=endDate), Q(status__gt=0)).values(
-            'currency_type').annotate(total_amount=Sum('total_amount'))
-    elif assignerId:
-        expensesByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                       Q(receipt_date__lte=endDate), Q(status__gt=0)).values(
-            'currency_type').annotate(total_amount=Sum('total_amount'))
+@api_view(['PUT'])
+def expenseUpdate(request, pk):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
 
-    return expensesByMonth
+    if lang is None or lang == '':
+        lang = 'en'
+
+    try:
+        expense = Expenses.objects.get(pk=pk)
+    except Expenses.DoesNotExist:
+        return Response(data={'success': False, 'error': ['Expense do not exist.']},
+                        status=status.HTTP_200_OK)
+
+    if request.method == 'PUT':
+        merchant_name = request.data.get('merchant_name')
+        receipt_date = request.data.get('receipt_date')
+        description = request.data.get('description')
+        total_amount = request.data.get('total_amount')
+        currency_type = request.data.get('currency_type')
+        category = request.data.get('category')
+        assignees = request.data.get('assignees')
+        file_urls = request.data.get('file_urls')
+        file_names = request.data.get('file_names')
+        user_id = request.data.get('user_id')
+        company_id = request.data.get('company_id')
+        statusNum = request.data.get('status')
+
+        expense.merchant_name = merchant_name
+        expense.receipt_date = receipt_date
+        expense.description = description
+        expense.total_amount = total_amount
+        expense.currency_type = currency_type
+        expense.category = category
+        expense.assignees = assignees
+        expense.file_urls = file_urls
+        expense.file_names = file_names
+        expense.user_id = user_id
+        expense.company_id = company_id
+        expense.status = statusNum
+
+        try:
+            expense.save()
+        except Expenses.DoesNotExist:
+            return Response(data={'success': False, 'error': ['Error in updating Expense.']}, status=status.HTTP_200_OK)
+
+        expenseData = getExpenseDetail([expense, ])
+
+    return Response(data={'success': True, 'data': expenseData}, status=status.HTTP_200_OK)
 
 
-def getMonthInfoCountForExpenses(startDate, endDate, userId, assignerId):
-    if userId:
-        expensesCountByMonth = list(Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate)))
-    elif assignerId:
-        expensesCountByMonth = list(Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate)))
-    count = len(expensesCountByMonth)
-    return count
+@api_view(['POST'])
+def expenseChangeStatus(request):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+
+    if lang is None or lang == '':
+        lang = 'en'
+
+    if request.method == 'POST':
+        id = request.data.get('id')
+        statusNum = request.data.get('status')
+
+        try:
+            expense = Expenses.objects.get(id=id)
+        except Expenses.DoesNotExist:
+            return Response(data={'success': False, 'error': ['Expense do not exist.']},
+                            status=status.HTTP_200_OK)
+
+        expense.status = statusNum
+
+        try:
+            expense.save()
+        except Expenses.DoesNotExist:
+            return Response(data={'success': False, 'error': ['Error in updating Expense Status.']}, status=status.HTTP_200_OK)
+
+    return Response(data={'success': True}, status=status.HTTP_200_OK)
 
 
-def getMonthTotalPrice(expensesByMonth, utc, etc):
-    total = 0
-    for expense in expensesByMonth:
-        if expense['currency_type'] == 1:
-            total += expense['total_amount'] / utc
-        elif expense['currency_type'] == 2:
-            total += expense['total_amount'] / etc
-        elif expense['currency_type'] == 3:
-            total += expense['total_amount']
-    return total
+@api_view(['POST'])
+def expenseUploadFile(request):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+
+    if lang is None or lang == '':
+        lang = 'en'
+
+    if request.method == 'POST':
+        expenseId = request.data.get('expense_id')
+        file = request.data.get('file')
+
+        # upload expense file
+        fileSerData = {
+            "expense_id": expenseId,
+            "file": file
+        }
+        fileSerializer = uploadExpenseFile(expenseId, fileSerData)
+
+        try:
+            expense = Expenses.objects.get(id=expenseId)
+        except Expenses.DoesNotExist:
+            return Response(data={'success': False, 'error': ['Expense do not exist.']},
+                            status=status.HTTP_200_OK)
+
+        fileName = fileSerializer.data.get('file')
+        expense.file_urls = fileName
+        expense.file_names = fileName
+
+        try:
+            expense.save()
+        except Expenses.DoesNotExist:
+            return Response(data={'success': False, 'error': ['Error in updating Expense file_url.']}, status=status.HTTP_200_OK)
+
+    return Response(data={'success': True, 'data': {'file_url': fileName}}, status=status.HTTP_200_OK)

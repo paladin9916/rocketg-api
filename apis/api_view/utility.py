@@ -1,5 +1,46 @@
-from apis.models import Industry_locales, Country_locales, Images, Countries
-from apis.serializers import ImageSerializer
+import calendar
+import datetime
+
+from django.db.models import Q, Sum
+
+from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users, ExpenseFile
+from apis.serializers import ImageSerializer, ExpenseFileSerializer
+
+
+def getExpenseData(expenseList, half):
+    expenses_data = []
+    for expense in expenseList:
+        user = Users.objects.get(id=expense.user_id)
+        image = Images.objects.filter(user_id=expense.user_id)[0]
+        expense_data = {
+            "id": expense.id,
+            "merchant_name": expense.merchant_name,
+            "receipt_date": expense.receipt_date,
+            "description": expense.description,
+            "total_amount": expense.total_amount,
+            "converted_amount": 0,
+            "category": expense.category,
+            "assignees": expense.assignees,
+            "file_urls": expense.file_urls,
+            "file_names": expense.file_names,
+            "user_id": expense.user_id,
+            "company_id": expense.company_id,
+            "currency_type": expense.currency_type,
+            "status": expense.status,
+            "created_at": expense.created_at,
+            "updated_at": expense.updated_at,
+            "user": {
+                "id": user.id,
+                "firstname": user.firstname,
+                "lastname": user.lastname,
+                "avatar_url": image.avatar.name,
+                "job_title": user.job_title,
+            },
+            "half": half,
+        }
+        expenses_data.append(expense_data)
+
+    return expenses_data
 
 
 def getIndustryData(industryList):
@@ -83,6 +124,31 @@ def getUserDataWithPW(users):
     return users_data
 
 
+def getExpenseDetail(expenses):
+    expenses_data = []
+
+    for expense in expenses:
+        expense_data = {
+            "id": expense.id,
+            "merchant_name": expense.merchant_name,
+            "receipt_date": expense.receipt_date,
+            "description": expense.description,
+            "total_amount": expense.total_amount,
+            "category": expense.category,
+            "assignees": expense.assignees,
+            "file_urls": expense.file_urls,
+            "file_names": expense.file_names,
+            "user_id": expense.user_id,
+            "company_id": expense.company_id,
+            "status": expense.status,
+            "created_at": expense.created_at,
+            "updated_at": expense.updated_at,
+        }
+        expenses_data.append(expense_data)
+
+    return expenses_data
+
+
 def getCompanyData(companies, lang):
     companies_data = []
 
@@ -127,3 +193,117 @@ def uploadImage(userId, imageInfo):
         image_serializer.save()
 
     return image_serializer
+
+
+def uploadExpenseFile(expenseId, expenseInfo):
+    try:
+        file = ExpenseFile.objects.get(expense_id=expenseId)
+        file_serializer = ExpenseFileSerializer(file, data=expenseInfo)
+    except ExpenseFile.DoesNotExist:
+        file_serializer = ExpenseFileSerializer(data=expenseInfo)
+
+    if file_serializer.is_valid():
+        file_serializer.save()
+
+    return file_serializer
+
+
+def first_day_in_month(year, month, type):
+    if type == 2:
+        return datetime.datetime(year, month, 16)
+    else:
+        return datetime.datetime(year, month, 1)
+
+
+def last_day_in_month(year, month, type):
+    lastDay = calendar.monthrange(year, month)[1]  # last day of month
+    if type == 1:
+        return datetime.datetime(year, month, 15)
+    else:
+        return datetime.datetime(year, month, lastDay)
+
+
+def getExpenseByMonth(startDate, endDate, userId, assignerId):
+    if userId:
+        dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
+                                                  Q(receipt_date__lte=endDate), Q(status__gt=0))
+    elif assignerId:
+        dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
+                                                  Q(receipt_date__lte=endDate), Q(status__gt=0), (
+                                                              Q(assignees=assignerId) | Q(
+                                                          assignees__startswith=assignerId) | Q(
+                                                          assignees__contains=assignerId) | Q(
+                                                          assignees__endswith=assignerId)))
+
+    return dataByMonth
+
+
+def getMonthInfoForExpenses(startDate, endDate, userId, assignerId):
+    if userId:
+        expensesByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
+                                                       Q(receipt_date__lte=endDate), Q(status__gt=0)).values(
+            'currency_type').annotate(total_amount=Sum('total_amount'))
+    elif assignerId:
+        expensesByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
+                                                       Q(receipt_date__lte=endDate), Q(status__gt=0), (Q(assignees=assignerId) | Q(assignees__startswith=assignerId) | Q(assignees__contains=assignerId) | Q(assignees__endswith=assignerId))).values(
+            'currency_type').annotate(total_amount=Sum('total_amount'))
+
+    return expensesByMonth
+
+
+def getMonthInfoCountForExpenses(startDate, endDate, userId, assignerId):
+    if userId:
+        expensesCountByMonth = list(Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate)))
+    elif assignerId:
+        expensesCountByMonth = list(Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate), (Q(assignees=assignerId) | Q(assignees__startswith=assignerId) | Q(assignees__contains=assignerId) | Q(assignees__endswith=assignerId))))
+    count = len(expensesCountByMonth)
+    return count
+
+
+def getMonthTotalPrice(expensesByMonth, wants_currency):
+    total = 0
+    for expense in expensesByMonth:
+        total += exchangeMoney(expense['total_amount'], expense['currency_type'], wants_currency)
+    return total
+
+
+def exchangeMoney(money, fromNum, toNum):
+    today = datetime.datetime.now()
+    g_today = ''
+
+    if g_today != today:
+        # g_utc = Concurrency.conversion_rate("CNY","USD")
+        # g_etc = Concurrency.conversion_rate("CNY", "USD")
+        #
+        # g_ctu = Concurrency.conversion_rate("CNY", "USD")
+        # g_etu = Concurrency.conversion_rate("CNY", "USD")
+        #
+        # g_ute = Concurrency.conversion_rate("CNY", "USD")
+        # g_cte = Concurrency.conversion_rate("CNY", "USD")
+        #
+        # g_today = today
+        g_ute = 0.15
+        g_utc = 0.15
+        g_etu = 0.15
+        g_etc = 0.15
+        g_ctu = 0.15
+        g_cte = 0.15
+
+
+    if fromNum == toNum:
+        money = money
+    elif fromNum == 1 and toNum == 2:
+        money = money / g_ute
+    elif fromNum == 1 and toNum == 3:
+        money = money / g_utc
+    elif fromNum == 2 and toNum == 1:
+        money = money / g_etu
+    elif fromNum == 2 and toNum == 3:
+        money = money / g_etc
+    elif fromNum == 3 and toNum == 1:
+        money = money / g_ctu
+    elif fromNum == 3 and toNum == 2:
+        money = money / g_cte
+
+    return money
+
