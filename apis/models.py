@@ -20,10 +20,10 @@ class Companies(models.Model):
     website = models.CharField(max_length=50, null=False, blank=True)
     employee_count_index = models.IntegerField(default=0)
     user_id = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     country = models.ForeignKey(Countries, on_delete=models.CASCADE, blank=True, null=True)
     industry = models.ForeignKey(Industries, on_delete=models.CASCADE, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Country_locales(models.Model):
@@ -31,16 +31,16 @@ class Country_locales(models.Model):
     currency = models.CharField(max_length=50, null=True, blank=True)
     language = models.CharField(max_length=50, null=True, blank=True)
     sort_order = models.IntegerField(default=0)
+    country = models.ForeignKey(Countries, on_delete=models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    country = models.ForeignKey(Countries, on_delete=models.CASCADE, blank=True, null=True)
 
 
 class Users(models.Model):
     provider = models.CharField(max_length=50, default="email", null=False)
     uid = models.CharField(max_length=50, default="", null=False)
-    encrypted_password = models.CharField(max_length=50, default="", null=False)
-    reset_password_token = models.CharField(max_length=50, null=True)
+    encrypted_password = models.CharField(max_length=255, default="", null=False)
+    reset_password_token = models.CharField(max_length=255, null=True)
     reset_password_sent_at = models.DateTimeField(null=True)
     allow_password_change = models.BooleanField(null=True)
     remember_created_at = models.DateTimeField(null=True)
@@ -86,8 +86,8 @@ class Expenses(models.Model):
     assignees = models.CharField(max_length=255, null=True, blank=True)
     file_urls = models.TextField(null=True, blank=True)
     file_names = models.TextField(null=True, blank=True)
-    company = models.ForeignKey(Companies, on_delete=models.CASCADE, blank=True, null=True)
     user = models.ForeignKey(Users, on_delete=models.CASCADE, blank=True, null=True)
+    company = models.ForeignKey(Companies, on_delete=models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     currency_type = models.IntegerField(null=True, blank=True)
@@ -105,9 +105,9 @@ class Industry_locales(models.Model):
     name = models.CharField(max_length=50, null=True, blank=True)
     language = models.CharField(max_length=50, null=True, blank=True)
     sort_order = models.IntegerField(default=0)
+    industry = models.ForeignKey(Industries, on_delete=models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    industry = models.ForeignKey(Industries, on_delete=models.CASCADE, blank=True, null=True)
 
 
 

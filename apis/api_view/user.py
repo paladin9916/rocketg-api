@@ -1,3 +1,4 @@
+
 from django.contrib.auth.hashers import make_password
 from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
 from django.db.models import Q
@@ -6,6 +7,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from RocketG_api import settings
 from apis.api_view.utility import getUserData, uploadImage, getUserDataWithPW
 from apis.models import Users
 
@@ -71,12 +73,19 @@ def userGetSave(request):
         reimbursementCycle = request.data.get('reimbursement_cycle')
         paymentsCurrency = request.data.get('payments_currency')
 
-        password = get_random_string(length=16)
-        encryptedPassword = make_password(password)
+        try:
 
-        user = Users(email=email, firstname=firstname, lastname=lastname, encrypted_password=encryptedPassword, reset_password_token=password, phone=phone, job_title=jobTitle,
-                     department=department, language=language, role_id=roleId, company_id=companyId,
-                     reimbursement_cycle=reimbursementCycle, payments_currency=paymentsCurrency)
+            if Users.objects.get(email=email):
+                return Response(data={'success': False, 'error': ['Exist user. Please try again.']},
+                                status=status.HTTP_200_OK)
+        except Users.DoesNotExist:
+            password = get_random_string(length=16)
+            salt = settings.SECRET_KEY
+            encryptedPassword = make_password(password, salt=salt)
+
+            user = Users(email=email, firstname=firstname, lastname=lastname, encrypted_password=encryptedPassword, reset_password_token=password, phone=phone, job_title=jobTitle,
+                         department=department, language=language, role_id=roleId, company_id=companyId,
+                         reimbursement_cycle=reimbursementCycle, payments_currency=paymentsCurrency)
 
         try:
             user.save()
@@ -127,7 +136,8 @@ def userDetailUpdate(request, pk):
         reimbursementCycle = request.data.get('reimbursement_cycle')
         paymentsCurrency = request.data.get('payments_currency')
 
-        encryptedPassword = make_password(password)
+        salt = settings.SECRET_KEY
+        encryptedPassword = make_password(password, salt=salt)
 
         user.email = email
         user.reset_password_token = password
@@ -166,7 +176,8 @@ def resetPassword(request):
         userId = int(request.query_params.get('user_id'))
 
         password = get_random_string(length=16)
-        encryptedPassword = make_password(password)
+        salt = settings.SECRET_KEY
+        encryptedPassword = make_password(password, salt=salt)
 
         try:
            user = Users.objects.get(id=userId)
