@@ -27,10 +27,8 @@ def signIn(request):
         # Auth Token
         token_key = binascii.hexlify(os.urandom(20)).decode()
         login_user.tokens = token_key
-        login_user.confirmation_token = token_key
         login_user.save()
-        # Session
-        request.session['token'] = token_key
+
         resultUserData = getUserData([login_user, ])[0]
         return Response(data={'data': resultUserData}, status=status.HTTP_200_OK, headers={'access-token': token_key, 'client': login_user.provider, 'uid': login_user.uid})
 
@@ -43,8 +41,11 @@ def signOut(request):
         uid = request.headers.get('uid')
 
         try:
-            Users.objects.get(tokens=token)
-            del request.session['token']
+            auth_user = Users.objects.get(tokens=token)
+            auth_user.tokens = ''
+            auth_user.provider = ''
+            auth_user.uid = ''
+            auth_user.save()
         except Users.DoesNotExist:
             return Response(data={'success': False, 'error': ['Error in signing out']},
                             status=status.HTTP_200_OK)
