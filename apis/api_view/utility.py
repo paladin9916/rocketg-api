@@ -1,8 +1,10 @@
 import calendar
 import datetime
+import requests
 
 from django.db.models import Q, Sum
 
+from apis.api_view import constants
 from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users, ExpenseFile
 from apis.serializers import ImageSerializer, ExpenseFileSerializer
 
@@ -153,7 +155,8 @@ def getCompanyData(companies, lang):
     companies_data = []
 
     for company in companies:
-        industryLocal = Industry_locales.objects.filter(language__startswith=lang, industry_id=company.industry.id).first()
+        industryLocal = Industry_locales.objects.filter(language__startswith=lang,
+                                                        industry_id=company.industry.id).first()
         countryLocal = Country_locales.objects.filter(language__startswith=lang, country_id=company.country.id).first()
 
         company_data = {
@@ -226,14 +229,14 @@ def last_day_in_month(year, month, type):
 def getExpenseByMonth(startDate, endDate, userId, assignerId):
     if userId:
         dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                  Q(receipt_date__lte=endDate), Q(status__gt=0))
+                                              Q(receipt_date__lte=endDate), Q(status__gt=0))
     elif assignerId:
         dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                  Q(receipt_date__lte=endDate), Q(status__gt=0), (
-                                                              Q(assignees=assignerId) | Q(
-                                                          assignees__startswith=assignerId) | Q(
-                                                          assignees__contains=assignerId) | Q(
-                                                          assignees__endswith=assignerId)))
+                                              Q(receipt_date__lte=endDate), Q(status__gt=0), (
+                                                      Q(assignees=assignerId) | Q(
+                                                  assignees__startswith=assignerId) | Q(
+                                                  assignees__contains=assignerId) | Q(
+                                                  assignees__endswith=assignerId)))
 
     return dataByMonth
 
@@ -241,11 +244,15 @@ def getExpenseByMonth(startDate, endDate, userId, assignerId):
 def getMonthInfoForExpenses(startDate, endDate, userId, assignerId):
     if userId:
         expensesByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                       Q(receipt_date__lte=endDate), Q(status__gt=0)).values(
+                                                  Q(receipt_date__lte=endDate), Q(status__gt=0)).values(
             'currency_type').annotate(total_amount=Sum('total_amount'))
     elif assignerId:
         expensesByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                       Q(receipt_date__lte=endDate), Q(status__gt=0), (Q(assignees=assignerId) | Q(assignees__startswith=assignerId) | Q(assignees__contains=assignerId) | Q(assignees__endswith=assignerId))).values(
+                                                  Q(receipt_date__lte=endDate), Q(status__gt=0), (
+                                                              Q(assignees=assignerId) | Q(
+                                                          assignees__startswith=assignerId) | Q(
+                                                          assignees__contains=assignerId) | Q(
+                                                          assignees__endswith=assignerId))).values(
             'currency_type').annotate(total_amount=Sum('total_amount'))
 
     return expensesByMonth
@@ -253,9 +260,13 @@ def getMonthInfoForExpenses(startDate, endDate, userId, assignerId):
 
 def getMonthInfoCountForExpenses(startDate, endDate, userId, assignerId):
     if userId:
-        expensesCountByMonth = list(Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate)))
+        expensesCountByMonth = list(
+            Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate)))
     elif assignerId:
-        expensesCountByMonth = list(Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate), (Q(assignees=assignerId) | Q(assignees__startswith=assignerId) | Q(assignees__contains=assignerId) | Q(assignees__endswith=assignerId))))
+        expensesCountByMonth = list(
+            Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate), (
+                        Q(assignees=assignerId) | Q(assignees__startswith=assignerId) | Q(
+                    assignees__contains=assignerId) | Q(assignees__endswith=assignerId))))
     count = len(expensesCountByMonth)
     return count
 
@@ -268,42 +279,49 @@ def getMonthTotalPrice(expensesByMonth, wants_currency):
 
 
 def exchangeMoney(money, fromNum, toNum):
-    today = datetime.datetime.now()
-    g_today = ''
-
-    if g_today != today:
-        # g_utc = Concurrency.conversion_rate("CNY","USD")
-        # g_etc = Concurrency.conversion_rate("CNY", "USD")
-        #
-        # g_ctu = Concurrency.conversion_rate("CNY", "USD")
-        # g_etu = Concurrency.conversion_rate("CNY", "USD")
-        #
-        # g_ute = Concurrency.conversion_rate("CNY", "USD")
-        # g_cte = Concurrency.conversion_rate("CNY", "USD")
-        #
-        # g_today = today
-        g_ute = 0.15
-        g_utc = 0.15
-        g_etu = 0.15
-        g_etc = 0.15
-        g_ctu = 0.15
-        g_cte = 0.15
-
+    today = datetime.date.today()
+    if constants.g_today != today:
+        constants.g_utc = RealTimeCurrencyExchangeRate("USD", "CNY", constants.api_key)
+        constants.g_etc = RealTimeCurrencyExchangeRate("EUR", "CNY", constants.api_key)
+        constants.g_ctu = RealTimeCurrencyExchangeRate("CNY", "USD", constants.api_key)
+        constants.g_etu = RealTimeCurrencyExchangeRate("EUR", "USD", constants.api_key)
+        constants.g_ute = RealTimeCurrencyExchangeRate("USD", "EUR", constants.api_key)
+        constants.g_cte = RealTimeCurrencyExchangeRate("CNY", "EUR", constants.api_key)
+        constants.g_today = today
 
     if fromNum == toNum:
         money = money
     elif fromNum == 1 and toNum == 2:
-        money = money / g_ute
+        money = money / constants.g_ute
     elif fromNum == 1 and toNum == 3:
-        money = money / g_utc
+        money = money / constants.g_utc
     elif fromNum == 2 and toNum == 1:
-        money = money / g_etu
+        money = money / constants.g_etu
     elif fromNum == 2 and toNum == 3:
-        money = money / g_etc
+        money = money / constants.g_etc
     elif fromNum == 3 and toNum == 1:
-        money = money / g_ctu
+        money = money / constants.g_ctu
     elif fromNum == 3 and toNum == 2:
-        money = money / g_cte
+        money = money / constants.g_cte
 
     return money
 
+
+def RealTimeCurrencyExchangeRate(from_currency, to_currency, api_key):
+
+    # base_url variable store base url
+    base_url = r"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE"
+
+    # main_url variable store complete url
+    main_url = base_url + "&from_currency=" + from_currency + "&to_currency=" + to_currency + "&apikey=" + api_key
+
+    # get method of requests module
+    # return response object
+    req_ob = requests.get(main_url)
+
+    # json method return json format
+    # data into python dictionary data type.
+
+    # result contains list of nested dictionaries
+    result = req_ob.json()
+    return float(result["Realtime Currency Exchange Rate"]["5. Exchange Rate"])
