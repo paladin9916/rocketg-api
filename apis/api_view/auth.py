@@ -43,7 +43,7 @@ def signOut(request):
         uid = request.headers.get('uid')
 
         try:
-            Users.objects.get(tokens=token)
+            # Users.objects.get(tokens=token)
             del request.session['token']
         except Users.DoesNotExist:
             return Response(data={'success': False, 'error': ['Error in signing out']},
