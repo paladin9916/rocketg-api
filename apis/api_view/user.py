@@ -1,4 +1,3 @@
-
 from django.contrib.auth.hashers import make_password
 from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
 from django.db.models import Q
@@ -173,7 +172,7 @@ def userDetailUpdate(request, pk):
 @api_view(['POST'])
 def resetPassword(request):
     if request.method == 'POST':
-        userId = int(request.query_params.get('user_id'))
+        userId = request.data.get('user_id')
 
         password = get_random_string(length=16)
         salt = settings.SECRET_KEY
