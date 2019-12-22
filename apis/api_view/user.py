@@ -8,7 +8,7 @@ from rest_framework.response import Response
 
 from RocketG_api import settings
 from apis.api_view.utility import getUserData, uploadImage, getUserDataWithPW
-from apis.models import Users
+from apis.models import Users, Companies
 
 
 @api_view(['GET', 'POST'])
@@ -88,6 +88,9 @@ def userGetSave(request):
 
         try:
             user.save()
+            company = Companies.objects.get(id=companyId)
+            company.active_employees += 1
+            company.save()
         except Users.DoesNotExist:
             return Response(data={'success': False, 'error': ['Error in creating User.']}, status=status.HTTP_200_OK)
 
