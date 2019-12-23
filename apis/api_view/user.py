@@ -86,7 +86,7 @@ def userGetSave(request):
                 salt = settings.SECRET_KEY
                 encryptedPassword = make_password(password, salt=salt)
 
-                user = Users(email=email, firstname=firstname, lastname=lastname, encrypted_password=encryptedPassword, reset_password_token=password, phone=phone, job_title=jobTitle,
+                user = Users(uid=email, email=email, firstname=firstname, lastname=lastname, encrypted_password=encryptedPassword, reset_password_token=password, phone=phone, job_title=jobTitle,
                              department=department, language=language, role_id=roleId, company_id=companyId,
                              reimbursement_cycle=reimbursementCycle, payments_currency=paymentsCurrency)
 

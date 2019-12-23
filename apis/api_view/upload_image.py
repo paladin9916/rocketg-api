@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from apis.api_view.utility import uploadImage
+from apis.models import Users
 
 
 class ImageUploadView(APIView):
@@ -16,6 +17,10 @@ class ImageUploadView(APIView):
 
         imageSerializer = uploadImage(userId, request.data)
         if imageSerializer.is_valid():
+            if userId != 0:
+                user = Users.objects.get(id=userId)
+                user.avatar = imageSerializer.data.get('avatar')
+                user.save()
             return Response(imageSerializer.data, status=status.HTTP_200_OK)
         else:
             return Response(imageSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
