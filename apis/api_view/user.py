@@ -125,7 +125,7 @@ def userDetailUpdate(request, pk):
         return Response(data={'success': True, 'data': userData}, status=status.HTTP_200_OK)
     elif request.method == 'PUT':
         email = request.data.get('email')
-        password = request.data.get('password')
+        # password = request.data.get('password')
         firstname = request.data.get('firstname')
         lastname = request.data.get('lastname')
         phone = request.data.get('phone')
@@ -138,12 +138,7 @@ def userDetailUpdate(request, pk):
         reimbursementCycle = request.data.get('reimbursement_cycle')
         paymentsCurrency = request.data.get('payments_currency')
 
-        salt = settings.SECRET_KEY
-        encryptedPassword = make_password(password, salt=salt)
-
         user.email = email
-        user.reset_password_token = password
-        user.encrypted_password = encryptedPassword
         user.firstname = firstname
         user.lastname = lastname
         user.phone = phone
