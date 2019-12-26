@@ -141,45 +141,34 @@ def userDetailUpdate(request, pk):
         avatar = request.data.get('avatar')
         reimbursementCycle = request.data.get('reimbursement_cycle')
         paymentsCurrency = request.data.get('payments_currency')
+        user.email = email
+        user.firstname = firstname
+        user.lastname = lastname
+        user.phone = phone
+        user.job_title = jobTitle
+        user.department = department
+        user.language = language
+        user.role_id = roleId
+        user.company_id = companyId
+        user.reimbursement_cycle = reimbursementCycle
+        user.payments_currency = paymentsCurrency
+
+        # upload avatar
+        imageSerData = {
+            "user_id": pk,
+            "avatar": avatar
+        }
+        imageSerializer = uploadImage(pk, imageSerData)
+        user.avatar = imageSerializer.data.get('avatar')
 
         try:
-            if Users.objects.get(email=email):
-                return Response(data={'success': False, 'error': ['Exist this email. Please try again.']},
-                                status=status.HTTP_200_OK)
+            user.save()
         except Users.DoesNotExist:
-            try:
-                if Users.objects.get(phone=phone):
-                    return Response(data={'success': False, 'error': ['Exist this phone number. Please try again.']},
-                                    status=status.HTTP_200_OK)
-            except Users.DoesNotExist:
-                user.email = email
-                user.firstname = firstname
-                user.lastname = lastname
-                user.phone = phone
-                user.job_title = jobTitle
-                user.department = department
-                user.language = language
-                user.role_id = roleId
-                user.company_id = companyId
-                user.reimbursement_cycle = reimbursementCycle
-                user.payments_currency = paymentsCurrency
+            return Response(data={'success': False, 'error': ['Error in updating user.']},
+                            status=status.HTTP_200_OK)
 
-                # upload avatar
-                imageSerData = {
-                    "user_id": pk,
-                    "avatar": avatar
-                }
-                imageSerializer = uploadImage(pk, imageSerData)
-                user.avatar = imageSerializer.data.get('avatar')
-
-                try:
-                    user.save()
-                except Users.DoesNotExist:
-                    return Response(data={'success': False, 'error': ['Error in updating user.']},
-                                    status=status.HTTP_200_OK)
-
-                userData = getUserData([user, ])
-                return Response(data={'success': True, 'data': userData}, status=status.HTTP_200_OK)
+        userData = getUserData([user, ])
+        return Response(data={'success': True, 'data': userData}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
