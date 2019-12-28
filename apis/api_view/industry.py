@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from apis.api_view.utility import getIndustryData
 from apis.models import Industry_locales
 
+from django.utils import translation
+
 
 @api_view(['GET'])
 def industryGet(request):
@@ -22,7 +24,7 @@ def industryGet(request):
         try:
             industryList = Industry_locales.objects.filter(Q(language=lang)).order_by('industry_id')
         except Industry_locales.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Error in getting industry.']}, status=status.HTTP_200_OK)
+            return Response(data={'success': False, 'error': [translation.gettext('Error in getting industry.')]}, status=status.HTTP_200_OK)
 
         industryData = getIndustryData(industryList)
         return Response(data={'success': True, 'data': industryData}, status=status.HTTP_200_OK)

@@ -9,6 +9,8 @@ from apis.api_view.utility import first_day_in_month, last_day_in_month, getMont
     uploadExpenseFile
 from apis.models import Expenses
 
+from django.utils import translation
+
 
 @api_view(['GET'])
 def expenseMonthList(request):
@@ -155,7 +157,7 @@ def expenseSave(request):
         try:
             expense.save()
         except Expenses.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Error in creating Expense.']}, status=status.HTTP_200_OK)
+            return Response(data={'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK)
 
         expenseData = getExpenseDetail([expense, ])
 
@@ -175,7 +177,7 @@ def expenseUpdate(request, pk):
     try:
         expense = Expenses.objects.get(pk=pk)
     except Expenses.DoesNotExist:
-        return Response(data={'success': False, 'error': ['Expense do not exist.']},
+        return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
                         status=status.HTTP_200_OK)
 
     if request.method == 'PUT':
@@ -208,7 +210,7 @@ def expenseUpdate(request, pk):
         try:
             expense.save()
         except Expenses.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Error in updating Expense.']}, status=status.HTTP_200_OK)
+            return Response(data={'success': False, 'error': [translation.gettext('Error in updating Expense.')]}, status=status.HTTP_200_OK)
 
         expenseData = getExpenseDetail([expense, ])
 
@@ -232,7 +234,7 @@ def expenseChangeStatus(request):
         try:
             expense = Expenses.objects.get(id=id)
         except Expenses.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Expense do not exist.']},
+            return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
                             status=status.HTTP_200_OK)
 
         expense.status = statusNum
@@ -240,7 +242,7 @@ def expenseChangeStatus(request):
         try:
             expense.save()
         except Expenses.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Error in updating Expense Status.']}, status=status.HTTP_200_OK)
+            return Response(data={'success': False, 'error': [translation.gettext('Error in updating Expense Status.')]}, status=status.HTTP_200_OK)
 
     return Response(data={'success': True}, status=status.HTTP_200_OK)
 
@@ -279,6 +281,6 @@ def expenseUploadFile(request):
         try:
             expense.save()
         except Expenses.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Error in updating Expense file_url.']}, status=status.HTTP_200_OK)
+            return Response(data={'success': False, 'error': [translation.gettext('Error in updating Expense file_url.')]}, status=status.HTTP_200_OK)
 
     return Response(data={'success': True, 'data': {'file_url': fileName}}, status=status.HTTP_200_OK)

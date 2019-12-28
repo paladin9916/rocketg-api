@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from apis.api_view.utility import getCompanyData
 from apis.models import Companies
 
+from django.utils import translation
+
 
 @api_view(['GET', 'POST'])
 def componyGetSave(request):
@@ -36,7 +38,7 @@ def componyGetSave(request):
         try:
             companyList = Companies.objects.all().order_by('created_at')
         except Companies.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Error in getting company.']}, status=status.HTTP_200_OK)
+            return Response(data={'success': False, 'error': [translation.gettext('Error in getting company.')]}, status=status.HTTP_200_OK)
 
         total_count = companyList.count()
         paginator = Paginator(companyList, perPage)  # Show users per page
@@ -62,7 +64,7 @@ def componyGetSave(request):
         try:
             company.save()
         except Companies.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Error in creating company.']}, status=status.HTTP_200_OK)
+            return Response(data={'success': False, 'error': [translation.gettext('Error in creating company.')]}, status=status.HTTP_200_OK)
         companyData = getCompanyData([company, ], lang)
         return Response(data={'success': True, 'data': companyData}, status=status.HTTP_200_OK)
 
@@ -78,7 +80,7 @@ def componyUpdate(request, pk):
         try:
             company = Companies.objects.get(pk=pk)
         except Companies.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Company do not exist.']},
+            return Response(data={'success': False, 'error': [translation.gettext('Company do not exist.')]},
                             status=status.HTTP_200_OK)
 
         name = request.data.get('name')
@@ -102,6 +104,6 @@ def componyUpdate(request, pk):
         try:
             company.save()
         except Companies.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Error in updating company.']}, status=status.HTTP_200_OK)
+            return Response(data={'success': False, 'error': [translation.gettext('Error in updating company.')]}, status=status.HTTP_200_OK)
         companyData = getCompanyData([company, ], lang)
         return Response(data={'success': True, 'data': companyData}, status=status.HTTP_200_OK)

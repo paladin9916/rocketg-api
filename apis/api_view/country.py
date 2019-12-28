@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from apis.api_view.utility import getCountryData
 from apis.models import Country_locales
 
+from django.utils import translation
+
 
 @api_view(['GET'])
 def countryGet(request):
@@ -22,7 +24,7 @@ def countryGet(request):
         try:
             countryList = Country_locales.objects.filter(Q(language=lang)).order_by('country_id')
         except Country_locales.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Error in getting country.']}, status=status.HTTP_200_OK)
+            return Response(data={'success': False, 'error': [translation.gettext('Error in getting country.')]}, status=status.HTTP_200_OK)
 
         countryData = getCountryData(countryList)
         return Response(data={'success': True, 'data': countryData}, status=status.HTTP_200_OK)
