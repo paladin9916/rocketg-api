@@ -10,6 +10,8 @@ from RocketG_api import settings
 from apis.api_view.utility import getUserData, uploadImage, getUserDataWithPW
 from apis.models import Users, Companies
 
+from django.utils import translation
+
 
 @api_view(['GET', 'POST'])
 def userGetSave(request):
@@ -43,7 +45,7 @@ def userGetSave(request):
                                             Q(email__contains=searchKey) | Q(firstname__contains=searchKey) | Q(
                                                 lastname__contains=searchKey)).order_by('id')
         except Users.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Error in getting user.']}, status=status.HTTP_200_OK)
+            return Response(data={'success': False, 'error': [translation.gettext('Error in getting user.')]}, status=status.HTTP_200_OK)
 
         total_count = userList.count()
         paginator = Paginator(userList, perPage)  # Show users per page
@@ -74,12 +76,12 @@ def userGetSave(request):
 
         try:
             if Users.objects.get(email=email):
-                return Response(data={'success': False, 'error': ['Exist this email. Please try again.']},
+                return Response(data={'success': False, 'error': [translation.gettext('Exist this email. Please try again.')]},
                                 status=status.HTTP_200_OK)
         except Users.DoesNotExist:
             try:
                 if Users.objects.get(phone=phone):
-                    return Response(data={'success': False, 'error': ['Exist this phone number. Please try again.']},
+                    return Response(data={'success': False, 'error': [translation.gettext('Exist this phone number. Please try again.')]},
                                     status=status.HTTP_200_OK)
             except Users.DoesNotExist:
                 password = get_random_string(length=16)
@@ -98,7 +100,7 @@ def userGetSave(request):
                     company.active_employees += 1
                     company.save()
                 except Users.DoesNotExist:
-                    return Response(data={'success': False, 'error': ['Error in creating User.']},
+                    return Response(data={'success': False, 'error': [translation.gettext('Error in creating User.')]},
                                     status=status.HTTP_200_OK)
 
                 # upload avatar
@@ -124,7 +126,7 @@ def userDetailUpdate(request, pk):
     try:
         user = Users.objects.get(pk=pk)
     except Users.DoesNotExist:
-        return Response(data={'success': False, 'error': ['User do not exist.']},
+        return Response(data={'success': False, 'error': [translation.gettext('User do not exist.')]},
                         status=status.HTTP_200_OK)
 
     if request.method == 'GET':
@@ -147,12 +149,12 @@ def userDetailUpdate(request, pk):
 
         try:
             if Users.objects.get(~Q(id=pk), Q(email=email)):
-                return Response(data={'success': False, 'error': ['Exist this email. Please try again.']},
+                return Response(data={'success': False, 'error': [translation.gettext('Exist this email. Please try again.')]},
                                 status=status.HTTP_200_OK)
         except Users.DoesNotExist:
             try:
                 if Users.objects.get(~Q(id=pk), Q(phone=phone)):
-                    return Response(data={'success': False, 'error': ['Exist this phone number. Please try again.']},
+                    return Response(data={'success': False, 'error': [translation.gettext('Exist this phone number. Please try again.')]},
                                     status=status.HTTP_200_OK)
             except Users.DoesNotExist:
                 user.uid = email
@@ -179,7 +181,7 @@ def userDetailUpdate(request, pk):
                 try:
                     user.save()
                 except Users.DoesNotExist:
-                    return Response(data={'success': False, 'error': ['Error in updating user.']},
+                    return Response(data={'success': False, 'error': [translation.gettext('Error in updating user.')]},
                                     status=status.HTTP_200_OK)
 
                 userData = getUserData([user, ])
@@ -201,7 +203,7 @@ def resetPassword(request):
             user.encrypted_password = encryptedPassword
             user.save()
         except Users.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Error in reseting password.']},
+            return Response(data={'success': False, 'error': [translation.gettext('Error in reseting password.')]},
                             status=status.HTTP_200_OK)
 
         return Response(data={'success': True, 'data': {"password": password}}, status=status.HTTP_200_OK)

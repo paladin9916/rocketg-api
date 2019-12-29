@@ -10,10 +10,19 @@ from RocketG_api import settings
 from apis.api_view.utility import getUserData
 from apis.models import Users
 
+from django.utils import translation
+
 
 @api_view(['POST'])
 def signIn(request):
     if request.method == 'POST':
+        token = request.headers.get('access-token')
+        client = request.headers.get('client')
+        uid = request.headers.get('uid')
+        lang = request.headers.get('Accept-Language')
+        # translation.activate(lang)
+        translation.activate(lang)
+        cur_lang = translation.get_language()
         email = request.data.get('email')
         password = request.data.get('password')
         salt = settings.SECRET_KEY
@@ -21,7 +30,7 @@ def signIn(request):
         try:
             login_user = Users.objects.get(email=email, encrypted_password=encrypted_pw)
         except Users.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Invalid login credentials. Please try again.']},
+            return Response(data={'success': False, 'error': [translation.gettext('Invalid login credentials. Please try again.')]},
                             status=status.HTTP_200_OK)
 
         # Auth Token
@@ -46,7 +55,7 @@ def signOut(request):
             # Users.objects.get(tokens=token)
             del request.session['token']
         except Users.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Error in signing out']},
+            return Response(data={'success': False, 'error': [translation.gettext('Error in signing out')]},
                             status=status.HTTP_200_OK)
 
         return Response(data={'success': True}, status=status.HTTP_200_OK)
