@@ -63,13 +63,13 @@ def signOut(request):
 
 @api_view(['POST'])
 def checkEmail(request):
-    if request.method == 'POST':
-        email = request.data.get('email')
-
-        try:
-            Users.objects.get(email=email)
+    try:
+            login_user = Users.objects.get(email=email)
         except Users.DoesNotExist:
-            return Response({'success': False, 'error': ['This email do not exist.']},
-                                status=status.HTTP_200_OK)
+            login_user = None
 
-        return Response({'success': True}, status=status.HTTP_200_OK)
+        if login_user == None:
+            return Response({'status': 'error', 'error_code': 10002},
+                                status=status.HTTP_200_OK)
+        else:
+            return Response({'state': 'success', 'error_code': 0}, status=status.HTTP_200_OK)
