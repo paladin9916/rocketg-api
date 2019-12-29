@@ -41,7 +41,7 @@ def signIn(request):
         # Session
         request.session['token'] = token_key
         resultUserData = getUserData([login_user, ])[0]
-        return Response(data={'data': resultUserData}, status=status.HTTP_200_OK, headers={'access-token': token_key, 'client': login_user.provider, 'uid': login_user.uid})
+        return Response(data={'success': True, 'data': resultUserData}, status=status.HTTP_200_OK, headers={'access-token': token_key, 'client': login_user.provider, 'uid': login_user.uid})
 
 
 @api_view(['DELETE'])
