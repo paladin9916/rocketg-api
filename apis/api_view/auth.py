@@ -63,7 +63,10 @@ def signOut(request):
 
 @api_view(['POST'])
 def checkEmail(request):
-    try:
+    if request.method == 'POST':
+        email = request.data.get('email')
+
+        try:
             login_user = Users.objects.get(email=email)
         except Users.DoesNotExist:
             login_user = None
