@@ -80,11 +80,11 @@ msgstr ""
 
 #: .\apis\api_view\user.py:79 .\apis\api_view\user.py:152
 msgid "Exist this email. Please try again."
-msgstr "has be take"
+msgstr "Email is already exist"
 
 #: .\apis\api_view\user.py:84 .\apis\api_view\user.py:157
 msgid "Exist this phone number. Please try again."
-msgstr "has be take"
+msgstr "Phone is already exist"
 
 #: .\apis\api_view\user.py:103
 msgid "Error in creating User."
