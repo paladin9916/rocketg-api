@@ -14,7 +14,9 @@ def industryGet(request):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('lang')
+    lang = request.headers.get('Accept-Language')
+    if lang is not None:
+        translation.activate(lang)
 
     if lang is None or lang == '':
         lang = 'en'

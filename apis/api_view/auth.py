@@ -20,9 +20,9 @@ def signIn(request):
         client = request.headers.get('client')
         uid = request.headers.get('uid')
         lang = request.headers.get('Accept-Language')
-        # translation.activate(lang)
-        translation.activate(lang)
-        cur_lang = translation.get_language()
+        if lang is not None:
+            translation.activate(lang)
+
         email = request.data.get('email')
         password = request.data.get('password')
         salt = settings.SECRET_KEY
@@ -50,6 +50,9 @@ def signOut(request):
         token = request.headers.get('access-token')
         client = request.headers.get('client')
         uid = request.headers.get('uid')
+        lang = request.headers.get('Accept-Language')
+        if lang is not None:
+            translation.activate(lang)
 
         try:
             # Users.objects.get(tokens=token)
@@ -65,6 +68,9 @@ def signOut(request):
 def checkEmail(request):
     if request.method == 'POST':
         email = request.data.get('email')
+        lang = request.headers.get('Accept-Language')
+        if lang is not None:
+            translation.activate(lang)
 
         try:
             Users.objects.get(email=email)
