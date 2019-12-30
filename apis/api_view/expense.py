@@ -17,7 +17,9 @@ def expenseMonthList(request):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('lang')
+    lang = request.headers.get('Accept-Language')
+    if lang is not None:
+        translation.activate(lang)
 
     if lang is None or lang == '':
         lang = 'en'
@@ -73,7 +75,9 @@ def expenseByMonth(request, month):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('lang')
+    lang = request.headers.get('Accept-Language')
+    if lang is not None:
+        translation.activate(lang)
 
     if lang is None or lang == '':
         lang = 'en'
@@ -120,7 +124,9 @@ def expenseSave(request):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('lang')
+    lang = request.headers.get('Accept-Language')
+    if lang is not None:
+        translation.activate(lang)
 
     if lang is None or lang == '':
         lang = 'en'
@@ -169,7 +175,9 @@ def expenseUpdate(request, pk):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('lang')
+    lang = request.headers.get('Accept-Language')
+    if lang is not None:
+        translation.activate(lang)
 
     if lang is None or lang == '':
         lang = 'en'
@@ -222,7 +230,9 @@ def expenseChangeStatus(request):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('lang')
+    lang = request.headers.get('Accept-Language')
+    if lang is not None:
+        translation.activate(lang)
 
     if lang is None or lang == '':
         lang = 'en'
@@ -252,7 +262,9 @@ def expenseUploadFile(request):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('lang')
+    lang = request.headers.get('Accept-Language')
+    if lang is not None:
+        translation.activate(lang)
 
     if lang is None or lang == '':
         lang = 'en'
