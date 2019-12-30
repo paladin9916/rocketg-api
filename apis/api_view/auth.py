@@ -41,7 +41,7 @@ def signIn(request):
         # Session
         request.session['token'] = token_key
         resultUserData = getUserData([login_user, ])[0]
-        return Response(data={'data': resultUserData}, status=status.HTTP_200_OK, headers={'access-token': token_key, 'client': login_user.provider, 'uid': login_user.uid})
+        return Response(data={'success': True, 'data': resultUserData}, status=status.HTTP_200_OK, headers={'access-token': token_key, 'client': login_user.provider, 'uid': login_user.uid})
 
 
 @api_view(['DELETE'])
@@ -67,12 +67,9 @@ def checkEmail(request):
         email = request.data.get('email')
 
         try:
-            login_user = Users.objects.get(email=email)
+            Users.objects.get(email=email)
         except Users.DoesNotExist:
-            login_user = None
-
-        if login_user == None:
-            return Response({'status': 'error', 'error_code': 10002},
+            return Response({'success': False, 'error': [translation.gettext('This email do not exist.')]},
                                 status=status.HTTP_200_OK)
-        else:
-            return Response({'state': 'success', 'error_code': 0}, status=status.HTTP_200_OK)
+
+        return Response({'success': True}, status=status.HTTP_200_OK)
