@@ -15,11 +15,13 @@ def componyGetSave(request):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('Accept-Language')
+    lang = request.headers.get('lang')
     if lang is not None:
-        translation.activate(lang)
-
-    if lang is None or lang == '':
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
         lang = 'en'
 
     if request.method == 'GET':
@@ -76,9 +78,14 @@ def componyUpdate(request, pk):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('Accept-Language')
+    lang = request.headers.get('lang')
     if lang is not None:
-        translation.activate(lang)
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
 
     if request.method == 'PUT':
         try:
