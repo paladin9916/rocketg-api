@@ -19,10 +19,15 @@ def signIn(request):
         token = request.headers.get('access-token')
         client = request.headers.get('client')
         uid = request.headers.get('uid')
-        lang = request.headers.get('Accept-Language')
-        # translation.activate(lang)
-        translation.activate(lang)
-        cur_lang = translation.get_language()
+        lang = request.headers.get('lang')
+        if lang is not None:
+            if lang == 'zh':
+                translation.activate('ch')
+            else:
+                translation.activate(lang)
+        elif lang is None or lang == '':
+            lang = 'en'
+
         email = request.data.get('email')
         password = request.data.get('password')
         salt = settings.SECRET_KEY
@@ -41,7 +46,7 @@ def signIn(request):
         # Session
         request.session['token'] = token_key
         resultUserData = getUserData([login_user, ])[0]
-        return Response(data={'data': resultUserData}, status=status.HTTP_200_OK, headers={'access-token': token_key, 'client': login_user.provider, 'uid': login_user.uid})
+        return Response(data={'success': True, 'data': resultUserData}, status=status.HTTP_200_OK, headers={'access-token': token_key, 'client': login_user.provider, 'uid': login_user.uid})
 
 
 @api_view(['DELETE'])
@@ -50,6 +55,14 @@ def signOut(request):
         token = request.headers.get('access-token')
         client = request.headers.get('client')
         uid = request.headers.get('uid')
+        lang = request.headers.get('lang')
+        if lang is not None:
+            if lang == 'zh':
+                translation.activate('ch')
+            else:
+                translation.activate(lang)
+        elif lang is None or lang == '':
+            lang = 'en'
 
         try:
             # Users.objects.get(tokens=token)
@@ -65,14 +78,19 @@ def signOut(request):
 def checkEmail(request):
     if request.method == 'POST':
         email = request.data.get('email')
+        lang = request.headers.get('lang')
+        if lang is not None:
+            if lang == 'zh':
+                translation.activate('ch')
+            else:
+                translation.activate(lang)
+        elif lang is None or lang == '':
+            lang = 'en'
 
         try:
-            login_user = Users.objects.get(email=email)
+            Users.objects.get(email=email)
         except Users.DoesNotExist:
-            login_user = None
-
-        if login_user == None:
-            return Response({'status': 'error', 'error_code': 10002},
+            return Response({'success': False, 'error': [translation.gettext('This email do not exist.')]},
                                 status=status.HTTP_200_OK)
-        else:
-            return Response({'state': 'success', 'error_code': 0}, status=status.HTTP_200_OK)
+
+        return Response({'success': True}, status=status.HTTP_200_OK)

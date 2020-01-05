@@ -15,8 +15,12 @@ def countryGet(request):
     client = request.headers.get('client')
     uid = request.headers.get('uid')
     lang = request.headers.get('lang')
-
-    if lang is None or lang == '':
+    if lang is not None:
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
         lang = 'en'
 
     if request.method == 'GET':

@@ -79,11 +79,11 @@ msgstr ""
 
 #: .\apis\api_view\user.py:79 .\apis\api_view\user.py:152
 msgid "Exist this email. Please try again."
-msgstr "已被佔用, 請修改後再次嘗試"
+msgstr "Email已被注册。"
 
 #: .\apis\api_view\user.py:84 .\apis\api_view\user.py:157
 msgid "Exist this phone number. Please try again."
-msgstr "已被佔用, 請修改後再次嘗試"
+msgstr "手机号码已被注册。"
 
 #: .\apis\api_view\user.py:103
 msgid "Error in creating User."
