@@ -24,7 +24,7 @@ staging:
   script:
   - sudo apt-get update -qy
   - sudo apt-get install -y python3-dev python3-pip
-  - sudo find /home/ec2-user/py-api/rocketg-api-python-staging/. -maxdepth 1 ! -name media ! -name . -exec rm -rv {} \;
+  - sudo find /home/ec2-user/py-api/rocketg-api-python-staging/. -maxdepth 1 ! -name media ! -name . -exec rm -rv {} \
   - source /home/ec2-user/py-api/venv/bin/activate
   - pip3 install -r /home/ec2-user/py-api/rocketg-api-python-staging/requirements.txt
   - python3 /home/ec2-user/py-api/rocketg-api-python-staging/manage.py makemigrations
