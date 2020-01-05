@@ -18,9 +18,14 @@ def userGetSave(request):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('Accept-Language')
+    lang = request.headers.get('lang')
     if lang is not None:
-        translation.activate(lang)
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
 
     if request.method == 'GET':
         page_str = request.query_params.get('page')
@@ -120,9 +125,14 @@ def userDetailUpdate(request, pk):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('Accept-Language')
+    lang = request.headers.get('lang')
     if lang is not None:
-        translation.activate(lang)
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
 
     try:
         user = Users.objects.get(pk=pk)
@@ -193,9 +203,14 @@ def userDetailUpdate(request, pk):
 def resetPassword(request):
     if request.method == 'POST':
         userId = request.data.get('user_id')
-        lang = request.headers.get('Accept-Language')
+        lang = request.headers.get('lang')
         if lang is not None:
-            translation.activate(lang)
+            if lang == 'zh':
+                translation.activate('ch')
+            else:
+                translation.activate(lang)
+        elif lang is None or lang == '':
+            lang = 'en'
 
         password = get_random_string(length=16)
         salt = settings.SECRET_KEY

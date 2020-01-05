@@ -89,7 +89,7 @@ DATABASES = {
     #    'ENGINE': 'django.db.backends.sqlite3',
     #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     #},
-    'default': {
+    'integration': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'py_rocketg_integration',
         'USER': 'rocketg_db_1',
@@ -97,7 +97,7 @@ DATABASES = {
         'HOST': '47.103.37.13',
         'PORT': '3306'
     },
-    'staging': {
+    'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'py_rocketg_staging',
         'USER': 'rocketg_db_1',
