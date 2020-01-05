@@ -110,4 +110,11 @@ class Industry_locales(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+class Reports(models.Model):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, blank=True, null=True)
+    comment = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 

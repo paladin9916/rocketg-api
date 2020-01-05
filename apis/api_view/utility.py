@@ -151,6 +151,27 @@ def getExpenseDetail(expenses):
     return expenses_data
 
 
+def getReportDetail(reports):
+    reports_data = []
+    for report in reports:
+        user = Users.objects.get(id=report.user_id)
+        report_data = {
+            "id": report.id,
+            "comment": report.comment,
+            "user": {
+                "id": user.id,
+                "firstname": user.firstname,
+                "lastname": user.lastname,
+                "job_title": user.job_title,
+            },
+            "created_at": report.created_at,
+            "updated_at": report.updated_at,
+        }
+        reports_data.append(report_data)
+
+    return reports_data
+
+
 def getCompanyData(companies, lang):
     companies_data = []
 
