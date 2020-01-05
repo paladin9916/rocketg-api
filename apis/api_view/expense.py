@@ -4,9 +4,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from apis.api_view.utility import first_day_in_month, last_day_in_month, getMonthInfoForExpenses, \
-    getMonthInfoCountForExpenses, getMonthTotalPrice, getExpenseByMonth, getExpenseData, getExpenseDetail, \
-    uploadExpenseFile
+from apis.api_view.utility import *
 from apis.models import Expenses
 
 from django.utils import translation
@@ -31,11 +29,16 @@ def expenseMonthList(request):
         userId = None if userId is None else int(userId)
         assignerId = request.query_params.get('assigner_id')
         assignerId = None if assignerId is None else int(assignerId)
-        cycleType = request.query_params.get('cycle_type')
-        cycleType = None if cycleType is None else int(cycleType)
-        wants_currency = request.query_params.get('wants_currency')
-        wants_currency = None if wants_currency is None else int(wants_currency)
-        order_by = request.query_params.get('order_by')
+        strCycleType = request.query_params.get('cycle_type')
+        if strCycleType is None or strCycleType == '':
+            cycleType = 0
+        else:
+            cycleType = int(strCycleType)
+        str_wants_currency = request.query_params.get('wants_currency')
+        if str_wants_currency is None or str_wants_currency == '':
+            wants_currency = 3
+        else:
+            wants_currency = int(str_wants_currency)
 
         currentYear = datetime.datetime.now().year
         month_info = []
@@ -77,6 +80,82 @@ def expenseMonthList(request):
 
 
 @api_view(['GET'])
+def expenseMonthListByStatus(request):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+    if lang is not None:
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
+
+    if request.method == 'GET':
+        userId = request.query_params.get('user_id')
+        userId = None if userId is None else int(userId)
+        assignerId = request.query_params.get('assigner_id')
+        assignerId = None if assignerId is None else int(assignerId)
+        strCycleType = request.query_params.get('cycle_type')
+        if strCycleType is None or strCycleType == '':
+            cycleType = 0
+        else:
+            cycleType = int(strCycleType)
+
+        str_wants_currency = request.query_params.get('wants_currency')
+        if str_wants_currency is None or str_wants_currency == '':
+            wants_currency = 3
+        else:
+            wants_currency = int(str_wants_currency)
+
+        str_exp_status = request.query_params.get('status')  #exp_status - status of expense (1: Submitted, 2: Processing, 3: Approved, 4: Reimbursed, 5: Closed)
+        if str_exp_status is None or str_exp_status == '':
+            exp_status = 1
+        else:
+            exp_status = int(str_exp_status)
+
+        currentYear = datetime.datetime.now().year
+        month_info = []
+
+        for i in range(12):
+            month = i + 1
+            if cycleType == 1:
+                startDate = first_day_in_month(currentYear, month, 1)
+                endDate = last_day_in_month(currentYear, month, 1)
+                expensesByMonth = getMonthInfoForExpensesByStatus(startDate, endDate, userId, assignerId, exp_status)
+                expenseCount = getMonthInfoCountForExpensesByStatus(startDate, endDate, userId, assignerId, exp_status)
+                if expenseCount != 0:
+                    total = getMonthTotalPrice(expensesByMonth, wants_currency)
+                    monthHistory = {"month": month, "half": 1, "total_amount": total}
+                    month_info.append(monthHistory)
+
+                startDate = first_day_in_month(currentYear, month, 2)
+                endDate = last_day_in_month(currentYear, month, 2)
+                expensesByMonth = getMonthInfoForExpensesByStatus(startDate, endDate, userId, assignerId, exp_status)
+                expenseCount = getMonthInfoCountForExpensesByStatus(startDate, endDate, userId, assignerId, exp_status)
+                if expenseCount != 0:
+                    total = getMonthTotalPrice(expensesByMonth, wants_currency)
+                    monthHistory = {"month": month, "half": 2, "total_amount": total}
+                    month_info.append(monthHistory)
+
+            else:
+                startDate = first_day_in_month(currentYear, month, 0)
+                endDate = last_day_in_month(currentYear, month, 0)
+                expensesByMonth = getMonthInfoForExpensesByStatus(startDate, endDate, userId, assignerId, exp_status)
+                expenseCount = getMonthInfoCountForExpensesByStatus(startDate, endDate, userId, assignerId, exp_status)
+                if expenseCount == 0:
+                    continue
+
+                total = getMonthTotalPrice(expensesByMonth, wants_currency)
+                monthHistory = {"month": month, "total_amount": total}
+                month_info.append(monthHistory)
+
+    return Response(data={'success': True, 'data': month_info}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
 def expenseByMonth(request, month):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
@@ -94,17 +173,21 @@ def expenseByMonth(request, month):
         month = 1
 
     if request.method == 'GET':
-        status_expense = request.query_params.get('status')
-        status_expense = None if status_expense is None else int(status_expense)
         userId = request.query_params.get('user_id')
         userId = None if userId is None else int(userId)
         assignerId = request.query_params.get('assigner_id')
         assignerId = None if assignerId is None else int(assignerId)
-        cycleType = request.query_params.get('cycle_type')
-        cycleType = None if cycleType is None else int(cycleType)
-        wants_currency = request.query_params.get('wants_currency')
-        wants_currency = None if wants_currency is None else int(wants_currency)
-        order_by = request.query_params.get('order_by')
+        strCycleType = request.query_params.get('cycle_type')
+        if strCycleType is None or strCycleType == '':
+            cycleType = 0
+        else:
+            cycleType = int(strCycleType)
+
+        str_wants_currency = request.query_params.get('wants_currency')
+        if str_wants_currency is None or str_wants_currency == '':
+            wants_currency = 3
+        else:
+            wants_currency = int(str_wants_currency)
 
         currentYear = datetime.datetime.now().year
         month_info = []
@@ -113,19 +196,93 @@ def expenseByMonth(request, month):
             startDate = first_day_in_month(currentYear, month, 1)
             endDate = last_day_in_month(currentYear, month, 1)
             expenses_data1 = getExpenseByMonth(startDate, endDate, userId, assignerId)
-            dataExpense_1 = getExpenseData(expenses_data1, 1)
+            dataExpense_1 = getExpenseData(expenses_data1, 1, wants_currency)
 
             startDate = first_day_in_month(currentYear, month, 2)
             endDate = last_day_in_month(currentYear, month, 2)
             expenses_data2 = getExpenseByMonth(startDate, endDate, userId, assignerId)
-            dataExpense_2 = getExpenseData(expenses_data2, 2)
+            dataExpense_2 = getExpenseData(expenses_data2, 2, wants_currency)
 
             month_info = dataExpense_1 + dataExpense_2
         else:
             startDate = first_day_in_month(currentYear, month, 0)
             endDate = last_day_in_month(currentYear, month, 0)
             expenses_data0 = getExpenseByMonth(startDate, endDate, userId, assignerId)
-            dataExpense_0 = getExpenseData(expenses_data0, 0)
+            dataExpense_0 = getExpenseData(expenses_data0, 0, wants_currency)
+
+            month_info = dataExpense_0
+
+    return Response(data={'success': True, 'data': month_info}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def expenseByMonthStatus(request, month):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+    if lang is not None:
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
+
+    if month is None or month == '':
+        month = 1
+
+    if request.method == 'GET':
+        userId = request.query_params.get('user_id')
+        userId = None if userId is None else int(userId)
+        assignerId = request.query_params.get('assigner_id')
+        assignerId = None if assignerId is None else int(assignerId)
+        strCycleType = request.query_params.get('cycle_type')
+        if strCycleType is None or strCycleType == '':
+            cycleType = 0
+        else:
+            cycleType = int(strCycleType)
+
+        str_wants_currency = request.query_params.get('wants_currency')
+        if str_wants_currency is None or str_wants_currency == '':
+            wants_currency = 3 #default
+        else:
+            wants_currency = int(str_wants_currency)
+
+        str_order_by = request.query_params.get(
+            'order_by')  # order by - newest to oldest:0, oldest to newest:1, by merchant name:2
+        if str_order_by is None or str_order_by == '':
+            order_by = 0 # default
+        else:
+            order_by = int(str_order_by)
+
+        str_exp_status = request.query_params.get(
+            'status')  # exp_status - status of expense (1: Submitted, 2: Processing, 3: Approved, 4: Reimbursed, 5: Closed)
+        if str_exp_status is None or str_exp_status == '':
+            exp_status = 1 # default
+        else:
+            exp_status = int(str_exp_status)
+
+        currentYear = datetime.datetime.now().year
+        month_info = []
+
+        if cycleType == 1:
+            startDate = first_day_in_month(currentYear, month, 1)
+            endDate = last_day_in_month(currentYear, month, 1)
+            expenses_data1 = getExpenseByMonthStatus(startDate, endDate, userId, assignerId, exp_status, order_by)
+            dataExpense_1 = getExpenseData(expenses_data1, 1, wants_currency)
+
+            startDate = first_day_in_month(currentYear, month, 2)
+            endDate = last_day_in_month(currentYear, month, 2)
+            expenses_data2 = getExpenseByMonthStatus(startDate, endDate, userId, assignerId, exp_status, order_by)
+            dataExpense_2 = getExpenseData(expenses_data2, 2, wants_currency)
+
+            month_info = dataExpense_1 + dataExpense_2
+        else:
+            startDate = first_day_in_month(currentYear, month, 0)
+            endDate = last_day_in_month(currentYear, month, 0)
+            expenses_data0 = getExpenseByMonthStatus(startDate, endDate, userId, assignerId, exp_status, order_by)
+            dataExpense_0 = getExpenseData(expenses_data0, 0, wants_currency)
 
             month_info = dataExpense_0
 

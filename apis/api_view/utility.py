@@ -9,7 +9,7 @@ from apis.models import Industry_locales, Country_locales, Images, Countries, Ex
 from apis.serializers import ImageSerializer, ExpenseFileSerializer
 
 
-def getExpenseData(expenseList, half):
+def getExpenseData(expenseList, half, wants_currency):
     expenses_data = []
     for expense in expenseList:
         user = Users.objects.get(id=expense.user_id)
@@ -19,7 +19,7 @@ def getExpenseData(expenseList, half):
             "merchant_name": expense.merchant_name,
             "receipt_date": expense.receipt_date,
             "description": expense.description,
-            "total_amount": expense.total_amount,
+            "total_amount": exchangeMoney(expense.total_amount, expense.currency_type, wants_currency),
             "converted_amount": 0,
             "category": expense.category,
             "assignees": expense.assignees,
@@ -237,7 +237,42 @@ def getExpenseByMonth(startDate, endDate, userId, assignerId):
                                                   assignees__startswith=assignerId) | Q(
                                                   assignees__contains=assignerId) | Q(
                                                   assignees__endswith=assignerId)))
+    return dataByMonth
 
+
+def getExpenseByMonthStatus(startDate, endDate, userId, assignerId, exp_status, order_by):
+    if userId:
+        if order_by == 0:
+            dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
+                                                  Q(receipt_date__lte=endDate), Q(status=exp_status)).order_by('-receipt_date')
+        elif order_by == 1:
+            dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
+                                                  Q(receipt_date__lte=endDate), Q(status=exp_status)).order_by('receipt_date')
+        elif order_by == 2:
+            dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
+                                                  Q(receipt_date__lte=endDate), Q(status=exp_status)).order_by('merchant_name')
+    elif assignerId:
+        if order_by == 0:
+            dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
+                                                  Q(receipt_date__lte=endDate), Q(status=exp_status), (
+                                                          Q(assignees=assignerId) | Q(
+                                                      assignees__startswith=assignerId) | Q(
+                                                      assignees__contains=assignerId) | Q(
+                                                      assignees__endswith=assignerId))).order_by('-receipt_date')
+        elif order_by == 1:
+            dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
+                                                  Q(receipt_date__lte=endDate), Q(status=exp_status), (
+                                                          Q(assignees=assignerId) | Q(
+                                                      assignees__startswith=assignerId) | Q(
+                                                      assignees__contains=assignerId) | Q(
+                                                      assignees__endswith=assignerId))).order_by('receipt_date')
+        elif order_by == 2:
+            dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
+                                                  Q(receipt_date__lte=endDate), Q(status=exp_status), (
+                                                          Q(assignees=assignerId) | Q(
+                                                      assignees__startswith=assignerId) | Q(
+                                                      assignees__contains=assignerId) | Q(
+                                                      assignees__endswith=assignerId))).order_by('merchant_name')
     return dataByMonth
 
 
@@ -254,7 +289,6 @@ def getMonthInfoForExpenses(startDate, endDate, userId, assignerId):
                                                           assignees__contains=assignerId) | Q(
                                                           assignees__endswith=assignerId))).values(
             'currency_type').annotate(total_amount=Sum('total_amount'))
-
     return expensesByMonth
 
 
@@ -265,6 +299,36 @@ def getMonthInfoCountForExpenses(startDate, endDate, userId, assignerId):
     elif assignerId:
         expensesCountByMonth = list(
             Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate), (
+                        Q(assignees=assignerId) | Q(assignees__startswith=assignerId) | Q(
+                    assignees__contains=assignerId) | Q(assignees__endswith=assignerId))))
+    count = len(expensesCountByMonth)
+    return count
+
+
+def getMonthInfoForExpensesByStatus(startDate, endDate, userId, assignerId, expStatus):
+    if userId:
+        expensesByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
+                                                  Q(receipt_date__lte=endDate), Q(status=expStatus)).values(
+            'currency_type').annotate(total_amount=Sum('total_amount'))
+    elif assignerId:
+        expensesByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
+                                                  Q(receipt_date__lte=endDate), Q(status=expStatus), (
+                                                              Q(assignees=assignerId) | Q(
+                                                          assignees__startswith=assignerId) | Q(
+                                                          assignees__contains=assignerId) | Q(
+                                                          assignees__endswith=assignerId))).values(
+            'currency_type').annotate(total_amount=Sum('total_amount'))
+
+    return expensesByMonth
+
+
+def getMonthInfoCountForExpensesByStatus(startDate, endDate, userId, assignerId, expStatus):
+    if userId:
+        expensesCountByMonth = list(
+            Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate), Q(status=expStatus)))
+    elif assignerId:
+        expensesCountByMonth = list(
+            Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate), Q(status=expStatus), (
                         Q(assignees=assignerId) | Q(assignees__startswith=assignerId) | Q(
                     assignees__contains=assignerId) | Q(assignees__endswith=assignerId))))
     count = len(expensesCountByMonth)
