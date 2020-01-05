@@ -17,11 +17,13 @@ def expenseMonthList(request):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('Accept-Language')
+    lang = request.headers.get('lang')
     if lang is not None:
-        translation.activate(lang)
-
-    if lang is None or lang == '':
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
         lang = 'en'
 
     if request.method == 'GET':
@@ -75,11 +77,13 @@ def expenseByMonth(request, month):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('Accept-Language')
+    lang = request.headers.get('lang')
     if lang is not None:
-        translation.activate(lang)
-
-    if lang is None or lang == '':
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
         lang = 'en'
 
     if month is None or month == '':
@@ -124,11 +128,13 @@ def expenseSave(request):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('Accept-Language')
+    lang = request.headers.get('lang')
     if lang is not None:
-        translation.activate(lang)
-
-    if lang is None or lang == '':
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
         lang = 'en'
 
     if request.method == 'POST':
@@ -175,11 +181,13 @@ def expenseUpdate(request, pk):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('Accept-Language')
+    lang = request.headers.get('lang')
     if lang is not None:
-        translation.activate(lang)
-
-    if lang is None or lang == '':
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
         lang = 'en'
 
     try:
@@ -230,11 +238,13 @@ def expenseChangeStatus(request):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('Accept-Language')
+    lang = request.headers.get('lang')
     if lang is not None:
-        translation.activate(lang)
-
-    if lang is None or lang == '':
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
         lang = 'en'
 
     if request.method == 'POST':
@@ -262,11 +272,13 @@ def expenseUploadFile(request):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
-    lang = request.headers.get('Accept-Language')
+    lang = request.headers.get('lang')
     if lang is not None:
-        translation.activate(lang)
-
-    if lang is None or lang == '':
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
         lang = 'en'
 
     if request.method == 'POST':
