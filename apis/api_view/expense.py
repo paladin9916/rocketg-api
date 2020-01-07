@@ -149,6 +149,7 @@ def expenseSave(request):
         file_urls = request.data.get('file_urls')
         file_names = request.data.get('file_names')
         user_id = request.data.get('user_id')
+        report_id = request.data.get('report_id')
         company_id = request.data.get('company_id')
         statusNum = request.data.get('status')
 
@@ -163,6 +164,7 @@ def expenseSave(request):
             file_urls=file_urls,
             file_names=file_names,
             user_id=user_id,
+            report_id=report_id,
             company_id=company_id,
             status=statusNum,
         )
@@ -231,6 +233,9 @@ def expenseUpdate(request, pk):
 
     try:
         expense = Expenses.objects.get(pk=pk)
+        if int(expense.status) > 0:
+            return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
+                        status=status.HTTP_200_OK)
     except Expenses.DoesNotExist:
         return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
                         status=status.HTTP_200_OK)
@@ -246,6 +251,7 @@ def expenseUpdate(request, pk):
         file_urls = request.data.get('file_urls')
         file_names = request.data.get('file_names')
         user_id = request.data.get('user_id')
+        report_id = request.data.get('report_id')
         company_id = request.data.get('company_id')
         statusNum = request.data.get('status')
 
@@ -259,6 +265,7 @@ def expenseUpdate(request, pk):
         expense.file_urls = file_urls
         expense.file_names = file_names
         expense.user_id = user_id
+        expense.report_id = report_id
         expense.company_id = company_id
         expense.status = statusNum
 
