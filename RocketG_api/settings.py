@@ -101,22 +101,22 @@ DATABASES = {
             'sql_mode': 'traditional',
         }
     },
-    # 'staging': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'py_rocketg_staging',
-    #     'USER': 'rocketg_db_1',
-    #     'PASSWORD': 'zxcasdQWE!@#',
-    #     'HOST': '47.103.37.13',
-    #     'PORT': '3306'
-    # },
-    # 'production': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'rl_py_rocketg',
-    #     'USER': 'rocketg_db_1',
-    #     'PASSWORD': 'zxcasdQWE!@#',
-    #     'HOST': '47.103.37.13',
-    #     'PORT': '3306'
-    # },
+    'staging': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'py_rocketg_staging',
+        'USER': 'rocketg_db_1',
+        'PASSWORD': 'zxcasdQWE!@#',
+        'HOST': '47.103.37.13',
+        'PORT': '3306'
+    },
+    'production': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'rl_py_rocketg',
+        'USER': 'rocketg_db_1',
+        'PASSWORD': 'zxcasdQWE!@#',
+        'HOST': '47.103.37.13',
+        'PORT': '3306'
+    },
 }
 
 
