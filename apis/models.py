@@ -66,8 +66,7 @@ class Users(models.Model):
     role_id = models.CharField(max_length=50, null=True, blank=True)
     language = models.CharField(max_length=50, null=True)
     company = models.ForeignKey(Companies, on_delete=models.CASCADE, blank=True, null=True)
-    reimbursement_cycle = models.IntegerField(null=True)
-    payments_currency = models.IntegerField(null=True)
+    payments_currency = models.IntegerField(default=3, null=False)
 
 
 class Images(models.Model):

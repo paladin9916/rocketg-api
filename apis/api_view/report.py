@@ -45,11 +45,11 @@ def getReportData(reports, totals, wants_currency):
     return reports
 
 def reportList(request):
-    reportData = None
+    reportData = []
     userId = request.query_params.get('user_id')
     assigneeId = request.query_params.get('assignee_id')
     wants_currency = request.query_params.get('wants_currency')
-    status = request.query_params.get('status')
+    expense_status = request.query_params.get('status')
     order_by = request.query_params.get('order_by')
     page = request.query_params.get('page')
     per_page = request.query_params.get('per_page')
@@ -71,7 +71,7 @@ def reportList(request):
         totals = getTotalForReports(report_ids)
         
     elif assigneeId != None:
-        report_ids = getReportIdsForAssignee(assigneeId, status)
+        report_ids = getReportIdsForAssignee(assigneeId, expense_status)
         oReports = Reports.objects.filter(id__in=report_ids)
         if order_by != None:
             oReports = oReports.order_by(order_by)
