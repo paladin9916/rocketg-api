@@ -8,6 +8,74 @@ from apis.api_view import constants
 from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users, ExpenseFile
 from apis.serializers import ImageSerializer, ExpenseFileSerializer
 
+def getReportIdsForAssignee(assignee, status):
+    totalForReport = []
+    if status != None:
+        totalForReport = Expenses.objects.filter(
+            Q(status__gt=0),
+            Q(status=status),
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            'report_id').distinct()
+    else:
+        totalForReport = Expenses.objects.filter(
+            Q(status__gt=0),
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            'report_id').distinct()
+
+    return totalForReport
+
+def getTotalForReports(ids, assignee = None, status = None):
+    totalForReport = []
+    if assignee != None:
+        if status != None:
+            totalForReport = Expenses.objects.filter(
+            Q(report_id__in=ids),
+            Q(status=status),
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            'report_id', 
+            'currency_type').annotate(total_amount=Sum('total_amount'))
+        else:
+            totalForReport = Expenses.objects.filter(
+            Q(report_id__in=ids),
+            Q(status__gt=0),
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            'report_id', 
+            'currency_type').annotate(total_amount=Sum('total_amount'))
+    else:
+        totalForReport = Expenses.objects.filter(
+            Q(status__gt=0),
+            Q(report_id__in=ids)).values(
+            'report_id', 
+            'currency_type').annotate(total_amount=Sum('total_amount'))
+
+    return totalForReport
+    
+
+def getUsersWithIds(ids):
+    users = Users.objects.filter(Q(id__in=ids))
+    return users
+
+
+def getReportData(reports):
+    user_ids = []
+    for report in reports:
+        user_ids.append(report.user_id)
+    
+    users = getUsersWithIds(user_ids)
+    reportsData = []
+    for report in reports:
+        user = [u for u in users if u.id == report.user_id]
+        user = getUserData(user)
+        reportData = {
+            "id": report.id,
+            "comment": report.comment,
+            "created_at": report.created_at,
+            "updated_at": report.updated_at,
+            "user": user[0]
+        }
+        reportsData.append(reportData)
+    
+    return reportsData
 
 def getExpenseData(expenseList, half):
     expenses_data = []
@@ -300,6 +368,9 @@ def getMonthTotalPrice(expensesByMonth, wants_currency):
 
 
 def exchangeMoney(money, fromNum, toNum):
+    fromNum = int(fromNum)
+    toNum = int(toNum)
+
     today = datetime.date.today()
     if constants.g_today != today:
         constants.g_utc = RealTimeCurrencyExchangeRate("USD", "CNY", constants.api_key)
@@ -313,17 +384,17 @@ def exchangeMoney(money, fromNum, toNum):
     if fromNum == toNum:
         money = money
     elif fromNum == 1 and toNum == 2:
-        money = money / constants.g_ute
+        money = money * constants.g_ute
     elif fromNum == 1 and toNum == 3:
-        money = money / constants.g_utc
+        money = money * constants.g_utc
     elif fromNum == 2 and toNum == 1:
-        money = money / constants.g_etu
+        money = money * constants.g_etu
     elif fromNum == 2 and toNum == 3:
-        money = money / constants.g_etc
+        money = money * constants.g_etc
     elif fromNum == 3 and toNum == 1:
-        money = money / constants.g_ctu
+        money = money * constants.g_ctu
     elif fromNum == 3 and toNum == 2:
-        money = money / constants.g_cte
+        money = money * constants.g_cte
 
     return money
 
@@ -331,11 +402,11 @@ def exchangeMoney(money, fromNum, toNum):
 def RealTimeCurrencyExchangeRate(from_currency, to_currency, api_key):
 
     # base_url variable store base url
-    base_url = r"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE"
+    base_url = r"https://api.exchangerate-api.com/v4/latest/"
 
     # main_url variable store complete url
-    main_url = base_url + "&from_currency=" + from_currency + "&to_currency=" + to_currency + "&apikey=" + api_key
-
+    main_url = base_url + from_currency
+    
     # get method of requests module
     # return response object
     req_ob = requests.get(main_url)
@@ -345,4 +416,4 @@ def RealTimeCurrencyExchangeRate(from_currency, to_currency, api_key):
 
     # result contains list of nested dictionaries
     result = req_ob.json()
-    return float(result["Realtime Currency Exchange Rate"]["5. Exchange Rate"])
+    return float(result.get('rates').get(to_currency))

@@ -27,5 +27,5 @@ urlpatterns = [
     path('user/expenses/change_status', expense.expenseChangeStatus),
     path('user/expenses/upload_file', expense.expenseUploadFile),
 
-    path('user/reports', report.reportSave)
+    path('user/reports', report.reports)
 ]

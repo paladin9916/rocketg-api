@@ -76,6 +76,11 @@ class Images(models.Model):
     def __str__(self):
         return self.avatar.name
 
+class Reports(models.Model):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, blank=True, null=True)
+    comment = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 class Expenses(models.Model):
     merchant_name = models.CharField(max_length=255, null=True, blank=True)
@@ -87,6 +92,7 @@ class Expenses(models.Model):
     file_urls = models.TextField(null=True, blank=True)
     file_names = models.TextField(null=True, blank=True)
     user = models.ForeignKey(Users, on_delete=models.CASCADE, blank=True, null=True)
+    report = models.ForeignKey(Reports, on_delete=models.CASCADE, blank=True, null=True)
     company = models.ForeignKey(Companies, on_delete=models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -108,13 +114,3 @@ class Industry_locales(models.Model):
     industry = models.ForeignKey(Industries, on_delete=models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-
-class Reports(models.Model):
-    user = models.ForeignKey(Users, on_delete=models.CASCADE, blank=True, null=True)
-    comment = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
-
