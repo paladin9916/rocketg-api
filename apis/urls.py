@@ -26,7 +26,7 @@ urlpatterns = [
     path('user/expenses/<int:pk>', expense.expenseUpdate),
     path('user/expenses/change_status', expense.expenseChangeStatus),
     path('user/expenses/upload_file', expense.expenseUploadFile),
-    path('user/expenses_month_status', expense.expenseMonthListByStatus),
-    path('user/expenses_month_status/<int:month>', expense.expenseByMonthStatus),
-    path('user/reports', report.reportSave)
+
+    path('user/reports', report.reports),
+    path('user/reports/<int:report>/expenses', expense.expensesInReport),
 ]

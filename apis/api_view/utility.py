@@ -8,41 +8,151 @@ from apis.api_view import constants
 from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users, ExpenseFile
 from apis.serializers import ImageSerializer, ExpenseFileSerializer
 
-
-def getExpenseData(expenseList, half, wants_currency):
-    expenses_data = []
-    for expense in expenseList:
-        user = Users.objects.get(id=expense.user_id)
-        image = Images.objects.filter(user_id=expense.user_id)[0]
-        expense_data = {
+def getExpenseData(expenses, wants_currency):
+    expensesList = []
+    user_ids = []
+    for expense in expenses:
+        expenseData = {
             "id": expense.id,
             "merchant_name": expense.merchant_name,
             "receipt_date": expense.receipt_date,
             "description": expense.description,
-            "total_amount": exchangeMoney(expense.total_amount, expense.currency_type, wants_currency),
-            "converted_amount": 0,
+            "total_amount": expense.total_amount,
             "category": expense.category,
-            "assignees": expense.assignees,
             "file_urls": expense.file_urls,
             "file_names": expense.file_names,
-            "user_id": expense.user_id,
             "company_id": expense.company_id,
             "currency_type": expense.currency_type,
             "status": expense.status,
             "created_at": expense.created_at,
-            "updated_at": expense.updated_at,
-            "user": {
-                "id": user.id,
-                "firstname": user.firstname,
-                "lastname": user.lastname,
-                "avatar_url": image.avatar.name,
-                "job_title": user.job_title,
-            },
-            "half": half,
+            "updated_at": expense.updated_at,            
+            "converted_amount": exchangeMoney(expense.total_amount, expense.currency_type, wants_currency),
+            "assignees_ids": str(expense.assignees).split(","),
+            "user_id": expense.user_id
         }
-        expenses_data.append(expense_data)
 
-    return expenses_data
+        expensesList.append(expenseData)
+        user_ids.append(int(expense.user_id))
+        user_ids += str(expense.assignees).split(',')
+
+    users = getUsersWithIds(user_ids)
+    expensesData = []
+    for expense in expensesList:
+        user = [u for u in users if u.id == expense["user_id"]]
+        user = getUserData(user)
+        expense["user"] = user[0]
+        expense["assignees"] = []
+        for assignee_id in expense["assignees_ids"]:
+            assignee = [u for u in users if u.id == int(assignee_id)]
+            assignee = getUserData(assignee)
+            expense["assignees"].append(assignee[0])
+
+        expensesData.append(expense)
+
+    return expensesData
+
+def getReportIdsForAssignee(assignee, status):
+    totalForReport = []
+    if status != None:
+        totalForReport = Expenses.objects.filter(
+            Q(status=status),
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            'report_id').distinct()
+    else:
+        totalForReport = Expenses.objects.filter(
+            Q(status__gt=0),
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            'report_id').distinct()
+
+    return totalForReport
+
+def getTotalForReports(ids, assignee = None, status = None):
+    totalForReport = []
+    if assignee != None:
+        if status != None:
+            totalForReport = Expenses.objects.filter(
+            Q(report_id__in=ids),
+            Q(status=status),
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            'report_id', 
+            'currency_type').annotate(total_amount=Sum('total_amount'))
+        else:
+            totalForReport = Expenses.objects.filter(
+            Q(report_id__in=ids),
+            Q(status__gt=0),
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            'report_id', 
+            'currency_type').annotate(total_amount=Sum('total_amount'))
+    else:
+        totalForReport = Expenses.objects.filter(
+            Q(status__gt=0),
+            Q(report_id__in=ids)).values(
+            'report_id', 
+            'currency_type').annotate(total_amount=Sum('total_amount'))
+
+    return totalForReport
+    
+
+def getUsersWithIds(ids):
+    users = Users.objects.filter(Q(id__in=ids))
+    return users
+
+
+def getReportData(reports):
+    user_ids = []
+    for report in reports:
+        user_ids.append(report.user_id)
+    
+    users = getUsersWithIds(user_ids)
+    reportsData = []
+    for report in reports:
+        user = [u for u in users if u.id == report.user_id]
+        user = getUserData(user)
+        reportData = {
+            "id": report.id,
+            "comment": report.comment,
+            "created_at": report.created_at,
+            "updated_at": report.updated_at,
+            "user": user[0]
+        }
+        reportsData.append(reportData)
+    
+    return reportsData
+
+# def getExpenseData(expenseList, half):
+#     expenses_data = []
+#     for expense in expenseList:
+#         user = Users.objects.get(id=expense.user_id)
+#         image = Images.objects.filter(user_id=expense.user_id)[0]
+#         expense_data = {
+#             "id": expense.id,
+#             "merchant_name": expense.merchant_name,
+#             "receipt_date": expense.receipt_date,
+#             "description": expense.description,
+#             "total_amount": expense.total_amount,
+#             "converted_amount": 0,
+#             "category": expense.category,
+#             "assignees": expense.assignees,
+#             "file_urls": expense.file_urls,
+#             "file_names": expense.file_names,
+#             "user_id": expense.user_id,
+#             "company_id": expense.company_id,
+#             "currency_type": expense.currency_type,
+#             "status": expense.status,
+#             "created_at": expense.created_at,
+#             "updated_at": expense.updated_at,
+#             "user": {
+#                 "id": user.id,
+#                 "firstname": user.firstname,
+#                 "lastname": user.lastname,
+#                 "avatar_url": image.avatar.name,
+#                 "job_title": user.job_title,
+#             },
+#             "half": half,
+#         }
+#         expenses_data.append(expense_data)
+
+#     return expenses_data
 
 
 def getIndustryData(industryList):
@@ -93,7 +203,6 @@ def getUserData(users):
             "role_id": user.role_id,
             "avatar_url": user.avatar,
             "company_id": user.company_id,
-            "reimbursement_cycle": user.reimbursement_cycle,
             "payments_currency": user.payments_currency,
         }
         users_data.append(user_data)
@@ -364,6 +473,10 @@ def getMonthTotalPrice(expensesByMonth, wants_currency):
 
 
 def exchangeMoney(money, fromNum, toNum):
+    money = float(money)
+    fromNum = int(fromNum)
+    toNum = int(toNum)
+
     today = datetime.date.today()
     if constants.g_today != today:
         constants.g_utc = RealTimeCurrencyExchangeRate("USD", "CNY", constants.api_key)
@@ -377,17 +490,17 @@ def exchangeMoney(money, fromNum, toNum):
     if fromNum == toNum:
         money = money
     elif fromNum == 1 and toNum == 2:
-        money = money / constants.g_ute
+        money = money * constants.g_ute
     elif fromNum == 1 and toNum == 3:
-        money = money / constants.g_utc
+        money = money * constants.g_utc
     elif fromNum == 2 and toNum == 1:
-        money = money / constants.g_etu
+        money = money * constants.g_etu
     elif fromNum == 2 and toNum == 3:
-        money = money / constants.g_etc
+        money = money * constants.g_etc
     elif fromNum == 3 and toNum == 1:
-        money = money / constants.g_ctu
+        money = money * constants.g_ctu
     elif fromNum == 3 and toNum == 2:
-        money = money / constants.g_cte
+        money = money * constants.g_cte
 
     return money
 
@@ -395,11 +508,11 @@ def exchangeMoney(money, fromNum, toNum):
 def RealTimeCurrencyExchangeRate(from_currency, to_currency, api_key):
 
     # base_url variable store base url
-    base_url = r"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE"
+    base_url = r"https://api.exchangerate-api.com/v4/latest/"
 
     # main_url variable store complete url
-    main_url = base_url + "&from_currency=" + from_currency + "&to_currency=" + to_currency + "&apikey=" + api_key
-
+    main_url = base_url + from_currency
+    
     # get method of requests module
     # return response object
     req_ob = requests.get(main_url)
@@ -409,4 +522,4 @@ def RealTimeCurrencyExchangeRate(from_currency, to_currency, api_key):
 
     # result contains list of nested dictionaries
     result = req_ob.json()
-    return float(result["Realtime Currency Exchange Rate"]["5. Exchange Rate"])
+    return float(result.get('rates').get(to_currency))

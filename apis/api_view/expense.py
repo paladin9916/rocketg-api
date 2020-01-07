@@ -6,6 +6,7 @@ from rest_framework.response import Response
 
 from apis.api_view.utility import *
 from apis.models import Expenses
+from django.db.models import Q, Sum
 
 from django.utils import translation
 
@@ -314,6 +315,7 @@ def expenseSave(request):
         file_urls = request.data.get('file_urls')
         file_names = request.data.get('file_names')
         user_id = request.data.get('user_id')
+        report_id = request.data.get('report_id')
         company_id = request.data.get('company_id')
         statusNum = request.data.get('status')
 
@@ -328,6 +330,7 @@ def expenseSave(request):
             file_urls=file_urls,
             file_names=file_names,
             user_id=user_id,
+            report_id=report_id,
             company_id=company_id,
             status=statusNum,
         )
@@ -341,6 +344,44 @@ def expenseSave(request):
 
     return Response(data={'success': True, 'data': expenseData}, status=status.HTTP_200_OK)
 
+@api_view(['GET'])
+def expensesInReport(request, report):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+    if lang is not None:
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
+
+    assigneeId = request.query_params.get('assignee_id')
+    wants_currency = request.query_params.get('wants_currency')
+    expense_status = request.query_params.get('status')
+    order_by = request.query_params.get('order_by')
+    page = request.query_params.get('page')
+    per_page = request.query_params.get('per_page')
+
+    if wants_currency == None:
+        wants_currency = 3
+
+    expenseData = []
+    oExpense = Expenses.objects.filter(Q(report_id=report))
+    if expense_status != None:
+        oExpense = oExpense.filter(Q(status=expense_status))
+
+    if assigneeId != None:
+        oExpense = oExpense.filter(Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))
+
+    if order_by != None:
+        oExpense = oExpense.order_by(order_by)
+
+    expenses = oExpense.all()
+    expenseData = getExpenseData(expenses, wants_currency)
+    return Response(data={'success': True, 'data': expenseData}, status=status.HTTP_200_OK)
 
 @api_view(['PUT'])
 def expenseUpdate(request, pk):
@@ -358,6 +399,9 @@ def expenseUpdate(request, pk):
 
     try:
         expense = Expenses.objects.get(pk=pk)
+        if int(expense.status) > 0:
+            return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
+                        status=status.HTTP_200_OK)
     except Expenses.DoesNotExist:
         return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
                         status=status.HTTP_200_OK)
@@ -373,6 +417,7 @@ def expenseUpdate(request, pk):
         file_urls = request.data.get('file_urls')
         file_names = request.data.get('file_names')
         user_id = request.data.get('user_id')
+        report_id = request.data.get('report_id')
         company_id = request.data.get('company_id')
         statusNum = request.data.get('status')
 
@@ -386,6 +431,7 @@ def expenseUpdate(request, pk):
         expense.file_urls = file_urls
         expense.file_names = file_names
         expense.user_id = user_id
+        expense.report_id = report_id
         expense.company_id = company_id
         expense.status = statusNum
 
