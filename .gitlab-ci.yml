@@ -11,7 +11,7 @@ integration:
   - source /home/ec2-user/py-api/venv/bin/activate
   - pip3 install -r /home/ec2-user/py-api/rocketg-api-python-integration/requirements.txt
   - python3 /home/ec2-user/py-api/rocketg-api-python-integration/manage.py makemigrations
-  - python3 /home/ec2-user/py-api/rocketg-api-python-integration/manage.py migrate --database=default
+  - python3 /home/ec2-user/py-api/rocketg-api-python-integration/manage.py migrate --database=integration
   - python3 /home/ec2-user/py-api/rocketg-api-python-integration/manage.py test
 
   only:
@@ -29,7 +29,7 @@ staging:
   - source /home/ec2-user/py-api/venv/bin/activate
   - pip3 install -r /home/ec2-user/py-api/rocketg-api-python-staging/requirements.txt
   - python3 /home/ec2-user/py-api/rocketg-api-python-staging/manage.py makemigrations
-  - python3 /home/ec2-user/py-api/rocketg-api-python-staging/manage.py migrate --database=staging
+  - python3 /home/ec2-user/py-api/rocketg-api-python-staging/manage.py migrate --database=default
   - python3 /home/ec2-user/py-api/rocketg-api-python-staging/manage.py test
 
   only:
