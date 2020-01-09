@@ -12,6 +12,7 @@ def getExpenseData(expenses, wants_currency):
     expensesList = []
     user_ids = []
     for expense in expenses:
+        assignees = list(map(toInt, filter(toInt, str(expense.assignees).split(','))))
         expenseData = {
             "id": expense.id,
             "merchant_name": expense.merchant_name,
@@ -27,13 +28,13 @@ def getExpenseData(expenses, wants_currency):
             "created_at": expense.created_at,
             "updated_at": expense.updated_at,            
             "converted_amount": exchangeMoney(expense.total_amount, expense.currency_type, wants_currency),
-            "assignees_ids": str(expense.assignees).split(","),
+            "assignees_ids": assignees,
             "user_id": expense.user_id
         }
 
         expensesList.append(expenseData)
         user_ids.append(int(expense.user_id))
-        user_ids += str(expense.assignees).split(',')
+        user_ids += assignees
 
     users = getUsersWithIds(user_ids)
     expensesData = []
@@ -50,6 +51,13 @@ def getExpenseData(expenses, wants_currency):
         expensesData.append(expense)
 
     return expensesData
+
+def toInt(variable):
+    try:
+        return int(variable)
+    except:
+        return None
+
 
 def getReportIdsForAssignee(assignee, status):
     totalForReport = []
