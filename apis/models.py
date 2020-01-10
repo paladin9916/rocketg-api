@@ -95,8 +95,8 @@ class Expenses(models.Model):
     company = models.ForeignKey(Companies, on_delete=models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    currency_type = models.IntegerField(null=True, blank=True)
-    status = models.IntegerField(null=True, blank=True)
+    currency_type = models.IntegerField(default=3, null=False)
+    status = models.IntegerField(default=0, null=False)
 
 
 class ExpenseFile(models.Model):
