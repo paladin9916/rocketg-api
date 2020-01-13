@@ -78,7 +78,7 @@ def reportList(request):
 
         reports = oReports.all()
         reportData = utGetReportData(reports)
-        totals = getTotalForReports(report_ids, assigneeId)
+        totals = getTotalForReports(report_ids, assigneeId, expense_status)
 
     reportData = getReportData(reportData, totals, wants_currency)
     return Response(data={'success': True, 'data': reportData}, status=status.HTTP_200_OK)
