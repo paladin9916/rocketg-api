@@ -353,7 +353,7 @@ def expenseUploadFile(request):
                 expense.save()
             except Expenses.DoesNotExist:
                 return Response(data={'success': False, 'error': [translation.gettext('Error in updating Expense file_url.')]}, status=status.HTTP_200_OK)
-        else
+        else:
             fileName = fileSerializer.data.get('file')        
 
     return Response(data={'success': True, 'data': {'file_url': fileName}}, status=status.HTTP_200_OK)
