@@ -337,20 +337,23 @@ def expenseUploadFile(request):
             "file": file
         }
         fileSerializer = uploadExpenseFile(expenseId, fileSerData)
+        fileName = None
 
-        try:
-            expense = Expenses.objects.get(id=expenseId)
-        except Expenses.DoesNotExist:
-            return Response(data={'success': False, 'error': ['Expense do not exist.']},
-                            status=status.HTTP_200_OK)
+        if expenseId != None:
+            try:
+                expense = Expenses.objects.get(id=expenseId)
+            except Expenses.DoesNotExist:
+                return Response(data={'success': False, 'error': ['Expense do not exist.']},
+                                status=status.HTTP_200_OK)
+            fileName = fileSerializer.data.get('file')
+            expense.file_urls = fileName
+            expense.file_names = fileName
 
-        fileName = fileSerializer.data.get('file')
-        expense.file_urls = fileName
-        expense.file_names = fileName
-
-        try:
-            expense.save()
-        except Expenses.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in updating Expense file_url.')]}, status=status.HTTP_200_OK)
+            try:
+                expense.save()
+            except Expenses.DoesNotExist:
+                return Response(data={'success': False, 'error': [translation.gettext('Error in updating Expense file_url.')]}, status=status.HTTP_200_OK)
+        else
+            fileName = fileSerializer.data.get('file')        
 
     return Response(data={'success': True, 'data': {'file_url': fileName}}, status=status.HTTP_200_OK)
