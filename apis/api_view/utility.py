@@ -337,6 +337,9 @@ def uploadImage(userId, imageInfo):
 
 
 def uploadExpenseFile(expenseId, expenseInfo):
+    if expenseId == None:
+        expenseId = 0
+        
     try:
         file = ExpenseFile.objects.get(expense_id=expenseId)
         file_serializer = ExpenseFileSerializer(file, data=expenseInfo)
