@@ -229,6 +229,7 @@ def expensesInReport(request, report):
         oExpense = oExpense.filter(Q(status=expense_status))
 
     if assigneeId != None:
+        assignee = assigneeId
         oExpense = oExpense.filter(Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))
 
     if order_by != None:
