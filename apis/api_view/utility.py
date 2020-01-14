@@ -79,6 +79,9 @@ def getCountForStatus(assignee, status):
             Q(status=status),
             (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
             'currency_type').annotate(count=Count('id'))
+            
+    if len(countData) == 0:
+        return 0
 
     return countData[0]["count"]
 
