@@ -334,47 +334,47 @@ def expenseChangeStatus(request):
     return Response(data={'success': True}, status=status.HTTP_200_OK)
 
 
-@api_view(['POST'])
-def expenseUploadFile(request):
-    token = request.headers.get('access-token')
-    client = request.headers.get('client')
-    uid = request.headers.get('uid')
-    lang = request.headers.get('lang')
-    if lang is not None:
-        if lang == 'zh':
-            translation.activate('ch')
-        else:
-            translation.activate(lang)
-    elif lang is None or lang == '':
-        lang = 'en'
+# @api_view(['POST'])
+# def expenseUploadFile(request):
+#     token = request.headers.get('access-token')
+#     client = request.headers.get('client')
+#     uid = request.headers.get('uid')
+#     lang = request.headers.get('lang')
+#     if lang is not None:
+#         if lang == 'zh':
+#             translation.activate('ch')
+#         else:
+#             translation.activate(lang)
+#     elif lang is None or lang == '':
+#         lang = 'en'
 
-    if request.method == 'POST':
-        expenseId = request.data.get('expense_id')
-        file = request.data.get('file')
+#     if request.method == 'POST':
+#         expenseId = request.data.get('expense_id')
+#         file = request.data.get('file')
 
-        # upload expense file
-        fileSerData = {
-            "expense_id": expenseId,
-            "file": file
-        }
-        fileSerializer = uploadExpenseFile(expenseId, fileSerData)
-        fileName = None
+#         # upload expense file
+#         fileSerData = {
+#             "expense_id": expenseId,
+#             "file": file
+#         }
+#         fileSerializer = uploadExpenseFile(expenseId, fileSerData)
+#         fileName = None
 
-        if expenseId != None:
-            try:
-                expense = Expenses.objects.get(id=expenseId)
-            except Expenses.DoesNotExist:
-                return Response(data={'success': False, 'error': ['Expense do not exist.']},
-                                status=status.HTTP_200_OK)
-            fileName = fileSerializer.data.get('file')
-            expense.file_urls = fileName
-            expense.file_names = fileName
+#         if expenseId != None:
+#             try:
+#                 expense = Expenses.objects.get(id=expenseId)
+#             except Expenses.DoesNotExist:
+#                 return Response(data={'success': False, 'error': ['Expense do not exist.']},
+#                                 status=status.HTTP_200_OK)
+#             fileName = fileSerializer.data.get('file')
+#             expense.file_urls = fileName
+#             expense.file_names = fileName
 
-            try:
-                expense.save()
-            except Expenses.DoesNotExist:
-                return Response(data={'success': False, 'error': [translation.gettext('Error in updating Expense file_url.')]}, status=status.HTTP_200_OK)
-        else:
-            fileName = fileSerializer.data.get('file')        
+#             try:
+#                 expense.save()
+#             except Expenses.DoesNotExist:
+#                 return Response(data={'success': False, 'error': [translation.gettext('Error in updating Expense file_url.')]}, status=status.HTTP_200_OK)
+#         else:
+#             fileName = fileSerializer.data.get('file')        
 
-    return Response(data={'success': True, 'data': {'file_url': fileName}}, status=status.HTTP_200_OK)
+#     return Response(data={'success': True, 'data': {'file_url': fileName}}, status=status.HTTP_200_OK)
