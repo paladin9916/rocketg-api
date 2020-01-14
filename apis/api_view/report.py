@@ -61,7 +61,7 @@ def reportList(request):
         wants_currency = 3
 
     if userId != None:
-        oReports = Reports.objects
+        oReports = Reports.objects.filter(user_id=userId)
         if order_by != None:
             oReports = oReports.order_by(order_by)
         
