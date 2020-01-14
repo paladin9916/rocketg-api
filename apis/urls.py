@@ -2,6 +2,7 @@ from apis.api_view import auth, company, user, expense, industry, country, repor
 from django.urls import path
 
 from apis.api_view.upload_image import ImageUploadView
+from apis.api_view.upload_attachment import AttachmentUploadView
 
 urlpatterns = [
     path('auth/sign_in', auth.signIn),
@@ -26,7 +27,7 @@ urlpatterns = [
     path('user/expenses/count', expense.expenseCount),
     path('user/expenses/<int:pk>', expense.expenseUpdate),
     path('user/expenses/change_status', expense.expenseChangeStatus),
-    path('user/expenses/upload_file', expense.expenseUploadFile),
+    path('user/expenses/upload_file', AttachmentUploadView.as_view()),
 
     path('user/reports', report.reports),
     path('user/reports/<int:report>/expenses', expense.expensesInReport),
