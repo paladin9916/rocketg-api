@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-from apis.api_view.utility import uploadImage
+from apis.api_view.utility import uploadExpenseFile
 from apis.models import Expenses
 
 
