@@ -36,11 +36,14 @@ def getReportData(reports, totals, wants_currency):
     reportData = []
     for report in reports:
         ntotal = 0
+        nCount = 0
         for total in totals:
             if total["report_id"] == report["id"]:
                 ntotal += exchangeMoney(total["total_amount"], total["currency_type"], wants_currency)
+                nCount += total["count"]
         
         report["total_amount"] = ntotal
+        report["count"] = nCount
 
     return reports
 
