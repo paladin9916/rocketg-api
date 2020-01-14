@@ -2,7 +2,7 @@ import calendar
 import datetime
 import requests
 
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 
 from apis.api_view import constants
 from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users, ExpenseFile
@@ -83,20 +83,20 @@ def getTotalForReports(ids, assignee = None, status = None):
             Q(status=status),
             (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
             'report_id', 
-            'currency_type').annotate(total_amount=Sum('total_amount'))
+            'currency_type').annotate(total_amount=Sum('total_amount'), count=Count('id'))
         else:
             totalForReport = Expenses.objects.filter(
             Q(report_id__in=ids),
             Q(status__gt=0),
             (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
             'report_id', 
-            'currency_type').annotate(total_amount=Sum('total_amount'))
+            'currency_type').annotate(total_amount=Sum('total_amount'), count=Count('id'))
     else:
         totalForReport = Expenses.objects.filter(
             Q(status__gt=0),
             Q(report_id__in=ids)).values(
             'report_id', 
-            'currency_type').annotate(total_amount=Sum('total_amount'))
+            'currency_type').annotate(total_amount=Sum('total_amount'), count=Count('id'))
 
     return totalForReport
     
