@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from apis.api_view.utility import first_day_in_month, last_day_in_month, getMonthInfoForExpenses, \
     getMonthInfoCountForExpenses, getMonthTotalPrice, getExpenseByMonth, getExpenseData, getExpenseDetail, \
-    uploadExpenseFile
+    uploadExpenseFile, getCountForStatus
 from apis.models import Expenses
 from django.db.models import Q, Sum
 
@@ -177,6 +177,27 @@ def expenseSave(request):
         expenseData = getExpenseDetail([expense, ])
 
     return Response(data={'success': True, 'data': expenseData}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def expenseCount(request):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+    if lang is not None:
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
+
+    assigneeId = request.query_params.get('assignee_id')
+    user_id = request.data.get('user_id')
+    expense_status = request.query_params.get('status')
+    
+    countData = getCountForStatus(assigneeId, expense_status)
+    return Response(data={'success': True, 'data': {'count': countData}}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def expensesInReport(request, report):

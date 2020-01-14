@@ -74,6 +74,14 @@ def getReportIdsForAssignee(assignee, status):
 
     return totalForReport
 
+def getCountForStatus(assignee, status):
+    countData = Expenses.objects.filter(
+            Q(status=status),
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            'currency_type').annotate(count=Count('id'))
+
+    return countData[0]["count"]
+
 def getTotalForReports(ids, assignee = None, status = None):
     totalForReport = []
     if assignee != None:
