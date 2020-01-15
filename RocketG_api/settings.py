@@ -100,7 +100,7 @@ DATABASES = {
             'sql_mode': 'traditional',
         }
     },
-    'default': {
+    'staging': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'py_rocketg_staging',
         'USER': 'rocketg_db_1',
