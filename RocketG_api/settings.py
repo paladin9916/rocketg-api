@@ -95,7 +95,10 @@ DATABASES = {
         'USER': 'rocketg_db_1',
         'PASSWORD': 'zxcasdQWE!@#',
         'HOST': '47.103.37.13',
-        'PORT': '3306'
+        'PORT': '3306',
+        'OPTIONS': {
+            'sql_mode': 'traditional',
+        }
     },
     'default': {
         'ENGINE': 'django.db.backends.mysql',
