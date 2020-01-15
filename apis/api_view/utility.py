@@ -222,6 +222,7 @@ def getUserData(users):
             "role_id": user.role_id,
             "avatar_url": user.avatar,
             "company_id": user.company_id,
+            "reimbursement_cycle": user.reimbursement_cycle,
             "payments_currency": user.payments_currency,
         }
         users_data.append(user_data)
