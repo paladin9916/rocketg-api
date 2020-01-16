@@ -49,7 +49,7 @@ def getReportData(reports, totals, wants_currency):
             if total["report_id"] == report["id"]:
                 nCount += total["count"]
                 ntotal += exchangeMoney(total["total_amount"], total["currency_type"], wants_currency)
-                payments_amount += exchangeMoney(total["total_amount"], report["payments_currency"], wants_currency)
+                payments_amount += exchangeMoney(total["total_amount"], total["currency_type"], report["payments_currency"])
         
         report["total_amount"] = ntotal
         report["count"] = nCount
