@@ -30,5 +30,6 @@ urlpatterns = [
     path('user/expenses/upload_file', AttachmentUploadView.as_view()),
 
     path('user/reports', report.reports),
+    path('user/reports/<int:pk>', report.deleteReport),
     path('user/reports/<int:report>/expenses', expense.expensesInReport),
 ]

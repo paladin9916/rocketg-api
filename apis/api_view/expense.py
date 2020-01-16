@@ -3,9 +3,10 @@ import datetime
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.core.files.storage import FileSystemStorage
 
 from apis.api_view.utility import *
-from apis.models import Expenses
+from apis.models import Expenses, Users
 from django.db.models import Q, Sum
 
 from django.utils import translation
@@ -319,6 +320,8 @@ def expenseSave(request):
         company_id = request.data.get('company_id')
         statusNum = request.data.get('status')
 
+        user = Users.objects.get(pk=user_id)
+
         expense = Expenses(
             merchant_name=merchant_name,
             receipt_date=receipt_date,
@@ -333,6 +336,7 @@ def expenseSave(request):
             report_id=report_id,
             company_id=company_id,
             status=statusNum,
+            payments_currency=user.payments_currency
         )
 
         try:
@@ -405,7 +409,7 @@ def expensesInReport(request, report):
     expenseData = getExpenseData(expenses, wants_currency)
     return Response(data={'success': True, 'data': expenseData}, status=status.HTTP_200_OK)
 
-@api_view(['PUT'])
+@api_view(['PUT', 'DELETE'])
 def expenseUpdate(request, pk):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
@@ -421,14 +425,15 @@ def expenseUpdate(request, pk):
 
     try:
         expense = Expenses.objects.get(pk=pk)
-        if int(expense.status) > 0:
-            return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
-                        status=status.HTTP_200_OK)
     except Expenses.DoesNotExist:
         return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
                         status=status.HTTP_200_OK)
 
     if request.method == 'PUT':
+        if int(expense.status) > 0:
+            return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
+                        status=status.HTTP_200_OK)
+        
         merchant_name = request.data.get('merchant_name')
         receipt_date = request.data.get('receipt_date')
         description = request.data.get('description')
@@ -443,6 +448,8 @@ def expenseUpdate(request, pk):
         company_id = request.data.get('company_id')
         statusNum = request.data.get('status')
 
+        user = Users.objects.get(pk=user_id)
+
         expense.merchant_name = merchant_name
         expense.receipt_date = receipt_date
         expense.description = description
@@ -456,6 +463,7 @@ def expenseUpdate(request, pk):
         expense.report_id = report_id
         expense.company_id = company_id
         expense.status = statusNum
+        expense.payments_currency = user.payments_currency
 
         try:
             expense.save()
@@ -464,7 +472,25 @@ def expenseUpdate(request, pk):
 
         expenseData = getExpenseDetail([expense, ])
 
-    return Response(data={'success': True, 'data': expenseData}, status=status.HTTP_200_OK)
+        return Response(data={'success': True, 'data': expenseData}, status=status.HTTP_200_OK)
+
+    elif request.method == 'DELETE':
+        if int(expense.status) > 1:
+            return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
+                        status=status.HTTP_200_OK)
+        
+        fs = FileSystemStorage()
+        filePath = str(expense.file_urls)
+        filePath = filePath.replace("/media/", "")
+
+        fs.delete(filePath)
+
+        try:
+            expense.delete()
+        except Expenses.DoesNotExist:
+            return Response(data={'success': False, 'error': [translation.gettext('Error in deleting Expense.')]}, status=status.HTTP_200_OK)
+
+        return Response(data={'success': True}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
