@@ -31,6 +31,8 @@ def getExpenseData(expenses, wants_currency):
             "updated_at": expense.updated_at,            
             "converted_amount": exchangeMoney(expense.total_amount, expense.currency_type, wants_currency),
             "assignees_ids": assignees,
+            "payments_currency": expense.payments_currency,
+            "payments_amount": exchangeMoney(expense.total_amount, expense.currency_type, expense.payments_currency),
             "user_id": expense.user_id
         }
 
@@ -104,6 +106,8 @@ def getTotalForReports(ids, assignee = None, status = None):
             (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
             'report_id', 
             'currency_type').annotate(total_amount=Sum('total_amount'), count=Count('id'))
+        
+        return totalForReport
     else:
         totalForReport = Expenses.objects.filter(
             Q(status__gt=0),
@@ -125,9 +129,8 @@ def getTotalForReports(ids, assignee = None, status = None):
                     break
 
             ret.append(oCount)
-
-    return ret
-    
+        
+        return ret
 
 def getUsersWithIds(ids):
     users = Users.objects.filter(Q(id__in=ids))
@@ -147,6 +150,7 @@ def getReportData(reports):
         reportData = {
             "id": report.id,
             "comment": report.comment,
+            "payments_currency": report.payments_currency,
             "created_at": report.created_at,
             "updated_at": report.updated_at,
             "user": user[0]
@@ -289,6 +293,8 @@ def getExpenseDetail(expenses):
             "user_id": expense.user_id,
             "company_id": expense.company_id,
             "status": expense.status,
+            "payments_currency": expense.payments_currency,
+            "currency_type": expense.currency_type,
             "created_at": expense.created_at,
             "updated_at": expense.updated_at,
         }

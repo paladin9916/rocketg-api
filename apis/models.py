@@ -79,6 +79,7 @@ class Images(models.Model):
 class Reports(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE, blank=True, null=True)
     comment = models.TextField(null=True, blank=True)
+    payments_currency = models.IntegerField(default=3, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -97,6 +98,7 @@ class Expenses(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     currency_type = models.IntegerField(default=3, null=False)
+    payments_currency = models.IntegerField(default=3, null=False)
     status = models.IntegerField(default=0, null=False)
 
 

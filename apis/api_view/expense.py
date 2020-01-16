@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from django.core.files.storage import FileSystemStorage
 
 from apis.api_view.utility import *
-from apis.models import Expenses
+from apis.models import Expenses, Users
 from django.db.models import Q, Sum
 
 from django.utils import translation
@@ -320,6 +320,8 @@ def expenseSave(request):
         company_id = request.data.get('company_id')
         statusNum = request.data.get('status')
 
+        user = Users.objects.get(pk=user_id)
+
         expense = Expenses(
             merchant_name=merchant_name,
             receipt_date=receipt_date,
@@ -334,6 +336,7 @@ def expenseSave(request):
             report_id=report_id,
             company_id=company_id,
             status=statusNum,
+            payments_currency=user.payments_currency
         )
 
         try:
@@ -445,6 +448,8 @@ def expenseUpdate(request, pk):
         company_id = request.data.get('company_id')
         statusNum = request.data.get('status')
 
+        user = Users.objects.get(pk=user_id)
+
         expense.merchant_name = merchant_name
         expense.receipt_date = receipt_date
         expense.description = description
@@ -458,6 +463,7 @@ def expenseUpdate(request, pk):
         expense.report_id = report_id
         expense.company_id = company_id
         expense.status = statusNum
+        expense.payments_currency = user.payments_currency
 
         try:
             expense.save()

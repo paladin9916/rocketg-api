@@ -20,10 +20,17 @@ def reportSave(request):
     elif lang is None or lang == '':
         lang = 'en'
 
+    user = Users.objects.get(pk=user_id)
+
     comment = request.data.get('comment')
     user_id = request.data.get('user_id')
+    payments_currency = models.IntegerField(default=3, null=False)
 
-    report = Reports(comment=comment, user_id=user_id)
+    report = Reports(
+        comment=comment,
+        user_id=user_id,
+        payments_currency=user.payments_currency
+    )
 
     try:
         report.save()
@@ -37,13 +44,16 @@ def getReportData(reports, totals, wants_currency):
     for report in reports:
         ntotal = 0
         nCount = 0
+        payments_amount = 0
         for total in totals:
             if total["report_id"] == report["id"]:
                 nCount += total["count"]
                 ntotal += exchangeMoney(total["total_amount"], total["currency_type"], wants_currency)
+                payments_amount += exchangeMoney(total["total_amount"], report["payments_currency"], wants_currency)
         
         report["total_amount"] = ntotal
         report["count"] = nCount
+        report["payments_amount"] = payments_amount
 
     return reports
 
