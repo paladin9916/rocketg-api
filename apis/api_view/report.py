@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from array import *
 
 from apis.api_view.utility import getReportDetail, getReportData as utGetReportData, getUsersWithIds, getTotalForReports, exchangeMoney, getReportIdsForAssignee
-from apis.models import Reports
+from apis.models import Reports, Users
 
 def reportSave(request):
     token = request.headers.get('access-token')
@@ -20,11 +20,10 @@ def reportSave(request):
     elif lang is None or lang == '':
         lang = 'en'
 
-    user = Users.objects.get(pk=user_id)
-
     comment = request.data.get('comment')
     user_id = request.data.get('user_id')
-    payments_currency = models.IntegerField(default=3, null=False)
+    
+    user = Users.objects.get(pk=user_id)
 
     report = Reports(
         comment=comment,
