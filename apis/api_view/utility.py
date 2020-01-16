@@ -109,9 +109,24 @@ def getTotalForReports(ids, assignee = None, status = None):
             Q(status__gt=0),
             Q(report_id__in=ids)).values(
             'report_id', 
-            'currency_type').annotate(total_amount=Sum('total_amount'), count=Count('id'))
+            'currency_type').annotate(total_amount=Sum('total_amount'))
+        
+        countForReport = Expenses.objects.filter(
+            Q(report_id__in=ids)).values(
+            'report_id', 
+            'currency_type').annotate(count=Count('id'))
 
-    return totalForReport
+        ret = []
+        for oCount in countForReport:
+            oCount.__setitem__("total_amount", 0)
+            for total in totalForReport:
+                if oCount["report_id"] == total["report_id"] and oCount["currency_type"] == total["currency_type"]:
+                    oCount["total_amount"] = total["total_amount"]
+                    break
+
+            ret.append(oCount)
+
+    return ret
     
 
 def getUsersWithIds(ids):
