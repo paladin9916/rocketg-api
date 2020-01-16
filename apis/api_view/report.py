@@ -92,3 +92,26 @@ def reports(request):
         return reportSave(request)
     elif request.method == 'GET':
         return reportList(request)
+
+@api_view(['DELETE'])
+def deleteReport(request, pk):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+    if lang is not None:
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
+
+    try:
+        report = Reports.objects.get(pk=pk)
+        report.delete()
+    except Expenses.DoesNotExist:
+        return Response(data={'success': False, 'error': [translation.gettext('Report do not exist.')]},
+                        status=status.HTTP_200_OK)
+
+    return Response(data={'success': True}, status=status.HTTP_200_OK)

@@ -5,8 +5,10 @@ import requests
 from django.db.models import Q, Sum, Count
 
 from apis.api_view import constants
-from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users, ExpenseFile
-from apis.serializers import ImageSerializer, ExpenseFileSerializer
+# from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users, ExpenseFile
+from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users
+# from apis.serializers import ImageSerializer, ExpenseFileSerializer
+from apis.serializers import ImageSerializer
 
 def getExpenseData(expenses, wants_currency):
     expensesList = []
@@ -348,17 +350,17 @@ def uploadImage(userId, imageInfo):
     return image_serializer
 
 
-def uploadExpenseFile(expenseId, expenseInfo):        
-    try:
-        file1 = ExpenseFile.objects.get(expense_id=expenseId)
-        file_serializer = ExpenseFileSerializer(file1, data=expenseInfo)
-    except ExpenseFile.DoesNotExist:
-        file_serializer = ExpenseFileSerializer(data=expenseInfo)
+# def uploadExpenseFile(expenseId, expenseInfo):        
+#     try:
+#         file1 = ExpenseFile.objects.get(expense_id=expenseId)
+#         file_serializer = ExpenseFileSerializer(file1, data=expenseInfo)
+#     except ExpenseFile.DoesNotExist:
+#         file_serializer = ExpenseFileSerializer(data=expenseInfo)
 
-    if file_serializer.is_valid():
-        file_serializer.save()
+#     if file_serializer.is_valid():
+#         file_serializer.save()
 
-    return file_serializer
+#     return file_serializer
 
 
 def first_day_in_month(year, month, type):

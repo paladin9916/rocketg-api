@@ -100,11 +100,11 @@ class Expenses(models.Model):
     status = models.IntegerField(default=0, null=False)
 
 
-class ExpenseFile(models.Model):
-    expense_id = models.IntegerField(default=0)
-    file = models.FileField(blank=False, null=False)
-    def __str__(self):
-        return self.file.name
+# class ExpenseFile(models.Model):
+#     expense_id = models.IntegerField(default=0)
+#     file = models.FileField(blank=False, null=False)
+#     def __str__(self):
+#         return self.file.name
 
 
 class Industry_locales(models.Model):
