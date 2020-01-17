@@ -88,7 +88,7 @@ class Expenses(models.Model):
     receipt_date = models.DateField(null=True, blank=True)
     description = models.CharField(max_length=255, null=True, blank=True)
     total_amount = models.FloatField(null=True, blank=True)
-    category = models.IntegerField(null=True, blank=True)
+    category = models.IntegerField(default=0, null=False)
     assignees = models.CharField(max_length=255, null=True, blank=True)
     file_urls = models.TextField(null=True, blank=True)
     file_names = models.TextField(null=True, blank=True)
