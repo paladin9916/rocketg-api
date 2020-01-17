@@ -479,11 +479,13 @@ def expenseUpdate(request, pk):
             return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
                         status=status.HTTP_200_OK)
         
-        fs = FileSystemStorage()
-        filePath = str(expense.file_urls)
-        filePath = filePath.replace("/media/", "")
+        if expense.file_urls != None:
+            filePath = str(expense.file_urls)
+            filePath = filePath.replace("/media/", "")
 
-        fs.delete(filePath)
+            if len(filePath) > 0:
+                fs = FileSystemStorage()
+                fs.delete(filePath)
 
         try:
             expense.delete()
