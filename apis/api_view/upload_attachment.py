@@ -18,14 +18,18 @@ class AttachmentUploadView(APIView):
 
     def post(self, request, *args, **kwargs):
         uploaded_file = request.FILES['file']
-        print(uploaded_file.name)
-        print(uploaded_file.size)
-        print(uploaded_file)
 
         filePath = ''
         isSet = False
         for i in range(0, 30):
-            filePath = str(randint(100000, 999999)) + str(timegm(gmtime())) + uploaded_file.name
+            filePath = str(randint(100000, 999999)) + str(timegm(gmtime()))
+            if uploaded_file.name.endswith('.pdf'):
+                filePath = filePath + ".pdf"
+            elif uploaded_file.name.endswith('.jpg') or filePath.endswith('.jpeg'):
+                filePath = filePath + ".jpg"
+            elif uploaded_file.name.endswith('.png'):
+                filePath = filePath + ".png"
+
             fs = FileSystemStorage()
             if  fs.exists(filePath) == False:
                 isSet = True
