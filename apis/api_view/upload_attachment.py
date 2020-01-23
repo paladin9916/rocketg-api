@@ -23,11 +23,11 @@ class AttachmentUploadView(APIView):
         isSet = False
         for i in range(0, 30):
             filePath = str(randint(100000, 999999)) + str(timegm(gmtime()))
-            if uploaded_file.name.endswith('.pdf'):
+            if uploaded_file.name.lower().endswith('.pdf'):
                 filePath = filePath + ".pdf"
-            elif uploaded_file.name.endswith('.jpg') or filePath.endswith('.jpeg'):
+            elif uploaded_file.name.lower().endswith('.jpg') or uploaded_file.name.lower().endswith('.jpeg'):
                 filePath = filePath + ".jpg"
-            elif uploaded_file.name.endswith('.png'):
+            elif uploaded_file.name.lower().endswith('.png'):
                 filePath = filePath + ".png"
 
             fs = FileSystemStorage()
