@@ -5,8 +5,10 @@ import requests
 from django.db.models import Q, Sum, Count
 
 from apis.api_view import constants
-from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users, ExpenseFile
-from apis.serializers import ImageSerializer, ExpenseFileSerializer
+# from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users, ExpenseFile
+from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users
+# from apis.serializers import ImageSerializer, ExpenseFileSerializer
+from apis.serializers import ImageSerializer
 
 def getExpenseData(expenses, wants_currency):
     expensesList = []
@@ -29,6 +31,8 @@ def getExpenseData(expenses, wants_currency):
             "updated_at": expense.updated_at,            
             "converted_amount": exchangeMoney(expense.total_amount, expense.currency_type, wants_currency),
             "assignees_ids": assignees,
+            "payments_currency": expense.payments_currency,
+            "payments_amount": exchangeMoney(expense.total_amount, expense.currency_type, expense.payments_currency),
             "user_id": expense.user_id
         }
 
@@ -102,15 +106,31 @@ def getTotalForReports(ids, assignee = None, status = None):
             (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
             'report_id', 
             'currency_type').annotate(total_amount=Sum('total_amount'), count=Count('id'))
+        
+        return totalForReport
     else:
         totalForReport = Expenses.objects.filter(
             Q(status__gt=0),
             Q(report_id__in=ids)).values(
             'report_id', 
-            'currency_type').annotate(total_amount=Sum('total_amount'), count=Count('id'))
+            'currency_type').annotate(total_amount=Sum('total_amount'))
+        
+        countForReport = Expenses.objects.filter(
+            Q(report_id__in=ids)).values(
+            'report_id', 
+            'currency_type').annotate(count=Count('id'))
 
-    return totalForReport
-    
+        ret = []
+        for oCount in countForReport:
+            oCount.__setitem__("total_amount", 0)
+            for total in totalForReport:
+                if oCount["report_id"] == total["report_id"] and oCount["currency_type"] == total["currency_type"]:
+                    oCount["total_amount"] = total["total_amount"]
+                    break
+
+            ret.append(oCount)
+        
+        return ret
 
 def getUsersWithIds(ids):
     users = Users.objects.filter(Q(id__in=ids))
@@ -130,6 +150,7 @@ def getReportData(reports):
         reportData = {
             "id": report.id,
             "comment": report.comment,
+            "payments_currency": report.payments_currency,
             "created_at": report.created_at,
             "updated_at": report.updated_at,
             "user": user[0]
@@ -272,6 +293,8 @@ def getExpenseDetail(expenses):
             "user_id": expense.user_id,
             "company_id": expense.company_id,
             "status": expense.status,
+            "payments_currency": expense.payments_currency,
+            "currency_type": expense.currency_type,
             "created_at": expense.created_at,
             "updated_at": expense.updated_at,
         }
@@ -348,17 +371,17 @@ def uploadImage(userId, imageInfo):
     return image_serializer
 
 
-def uploadExpenseFile(expenseId, expenseInfo):        
-    try:
-        file1 = ExpenseFile.objects.get(expense_id=expenseId)
-        file_serializer = ExpenseFileSerializer(file1, data=expenseInfo)
-    except ExpenseFile.DoesNotExist:
-        file_serializer = ExpenseFileSerializer(data=expenseInfo)
+# def uploadExpenseFile(expenseId, expenseInfo):        
+#     try:
+#         file1 = ExpenseFile.objects.get(expense_id=expenseId)
+#         file_serializer = ExpenseFileSerializer(file1, data=expenseInfo)
+#     except ExpenseFile.DoesNotExist:
+#         file_serializer = ExpenseFileSerializer(data=expenseInfo)
 
-    if file_serializer.is_valid():
-        file_serializer.save()
+#     if file_serializer.is_valid():
+#         file_serializer.save()
 
-    return file_serializer
+#     return file_serializer
 
 
 def first_day_in_month(year, month, type):

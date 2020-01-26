@@ -1,9 +1,15 @@
+from random import randint
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
+from time import gmtime
+from calendar import timegm
+
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-from apis.api_view.utility import uploadExpenseFile
+#from apis.api_view.utility import uploadExpenseFile
 from apis.models import Expenses
 
 
@@ -11,18 +17,27 @@ class AttachmentUploadView(APIView):
     parser_class = (FileUploadParser,)
 
     def post(self, request, *args, **kwargs):
-        expenseId = request.data.get('expense_id')
-        if expenseId == '' or expenseId is None:
-            expenseId = 0
+        uploaded_file = request.FILES['file']
 
-        fileSerializer = uploadExpenseFile(expenseId, request.data)
-        if fileSerializer.is_valid():
-            if expenseId != 0:
-                expense = Expenses.objects.get(id=expenseId)
-                expense.file_urls = fileName
-                expense.file_names = fileName
-                expense.save()
-                
-            return Response(fileSerializer.data, status=status.HTTP_200_OK)
-        else:
+        filePath = ''
+        isSet = False
+        for i in range(0, 30):
+            filePath = str(randint(100000, 999999)) + str(timegm(gmtime()))
+            if uploaded_file.name.lower().endswith('.pdf'):
+                filePath = filePath + ".pdf"
+            elif uploaded_file.name.lower().endswith('.jpg') or uploaded_file.name.lower().endswith('.jpeg'):
+                filePath = filePath + ".jpg"
+            elif uploaded_file.name.lower().endswith('.png'):
+                filePath = filePath + ".png"
+
+            fs = FileSystemStorage()
+            if  fs.exists(filePath) == False:
+                isSet = True
+                break
+        
+        if isSet == False:
             return Response(fileSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        fs.save(filePath, uploaded_file)
+
+        return Response(data={'success': True, 'data': {'file': settings.MEDIA_URL + filePath}}, status=status.HTTP_200_OK)
