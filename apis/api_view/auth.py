@@ -63,13 +63,13 @@ def signOut(request):
                 translation.activate(lang)
         elif lang is None or lang == '':
             lang = 'en'
-
-        try:
-            # Users.objects.get(tokens=token)
-            del request.session['token']
-        except Users.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in signing out')]},
-                            status=status.HTTP_200_OK)
+ 
+        # try:
+        #     # Users.objects.get(tokens=token)
+        #     del request.session['token']
+        # except Users.DoesNotExist:
+        #     return Response(data={'success': False, 'error': [translation.gettext('Error in signing out')]},
+        #                     status=status.HTTP_200_OK)
 
         return Response(data={'success': True}, status=status.HTTP_200_OK)
 
