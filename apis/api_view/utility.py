@@ -245,6 +245,7 @@ def getUserData(users):
             "company_id": user.company_id,
             "reimbursement_cycle": user.reimbursement_cycle,
             "payments_currency": user.payments_currency,
+            "special_privilege": user.special_privilege
         }
         users_data.append(user_data)
 
@@ -270,6 +271,7 @@ def getUserDataWithPW(users):
             "company_id": user.company_id,
             "reimbursement_cycle": user.reimbursement_cycle,
             "payments_currency": user.payments_currency,
+            "special_privilege": user.special_privilege
         }
         users_data.append(user_data)
 
