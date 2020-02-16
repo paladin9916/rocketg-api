@@ -22,6 +22,10 @@ class Companies(models.Model):
     user_id = models.IntegerField(default=0)
     country = models.ForeignKey(Countries, on_delete=models.CASCADE, blank=True, null=True)
     industry = models.ForeignKey(Industries, on_delete=models.CASCADE, blank=True, null=True)
+    open_user_id = models.IntegerField(null=True)
+    processing_id = models.IntegerField(null=True)
+    approve_id = models.IntegerField(null=True)
+    reimburse_id = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -68,7 +72,6 @@ class Users(models.Model):
     company = models.ForeignKey(Companies, on_delete=models.CASCADE, blank=True, null=True)
     payments_currency = models.IntegerField(default=3, null=False)
     reimbursement_cycle = models.IntegerField(default=0, null=False)
-    special_privilege = models.IntegerField(default=0, null=False)
 
 
 class Images(models.Model):

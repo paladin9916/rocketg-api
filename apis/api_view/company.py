@@ -1,11 +1,12 @@
 from django.core import serializers
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from apis.api_view.utility import getCompanyData
-from apis.models import Companies
+from apis.api_view.utility import getCompanyData, getUserData
+from apis.models import Companies, Users
 
 from django.utils import translation
 
@@ -118,3 +119,106 @@ def componyUpdate(request, pk):
             return Response(data={'success': False, 'error': [translation.gettext('Error in updating company.')]}, status=status.HTTP_200_OK)
         companyData = getCompanyData([company, ], lang)
         return Response(data={'success': True, 'data': companyData}, status=status.HTTP_200_OK)
+
+@api_view(['PUT', 'GET'])
+def specialUsers(request, pk):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+    if lang is not None:
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
+
+    companyId = pk
+    company = None
+    try:
+        company = Companies.objects.get(pk=pk)
+    except Companies.DoesNotExist:
+        return Response(data={'success': False, 'error': [translation.gettext('Company do not exist.')]},
+                        status=status.HTTP_200_OK)
+
+    if request.method == 'PUT':
+        openUserId = request.data.get('open')
+        processingUserId = request.data.get('processing')
+        approveUserId = request.data.get('approve')
+        reimburseUserId = request.data.get('reimburse')
+
+        company.open_user_id = openUserId
+        company.processing_id = processingUserId
+        company.approve_id = approveUserId
+        company.reimburse_id = reimburseUserId
+        
+        try:
+            company.save()
+        except Companies.DoesNotExist:
+            return Response(data={'success': False, 'error': [translation.gettext('Error in updating company.')]}, status=status.HTTP_200_OK)
+        companyData = getCompanyData([company, ], lang)
+        return Response(data={'success': True, 'data': companyData}, status=status.HTTP_200_OK)
+
+    elif request.method == 'GET':
+        userIds = []
+        if company.open_user_id != None:
+            userIds.append(company.open_user_id)
+        if company.processing_id != None:
+            userIds.append(company.processing_id)
+        if company.approve_id != None:
+            userIds.append(company.approve_id)
+        if company.reimburse_id != None:
+            userIds.append(company.reimburse_id)        
+
+        users = Users.objects.filter(Q(id__in=userIds), Q(company_id=companyId))
+        userData = getUserData(users)
+
+        data = {}
+        for user in userData:
+            if user["id"] == company.open_user_id:
+                data["open"] = user
+            elif user["id"] == company.processing_id:
+                data["processing"] = user
+            elif user["id"] == company.approve_id:
+                data["approve"] = user
+            elif user["id"] == company.reimburse_id:
+                data["reimburse"] = user
+        
+        return Response(data={'success': True, 'data': data}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def specialUser(request, pk, privilege):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+    if lang is not None:
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
+
+    companyId = pk
+    company = None
+    try:
+        company = Companies.objects.get(pk=pk)
+    except Companies.DoesNotExist:
+        return Response(data={'success': False, 'error': [translation.gettext('Company do not exist.')]},
+                        status=status.HTTP_200_OK)
+
+    users = None
+    if privilege == 'open':
+        users = Users.objects.filter(Q(id=company.open_user_id), Q(company_id=companyId))
+    elif privilege == 'processing':
+        users = Users.objects.filter(Q(id=company.processing_id), Q(company_id=companyId))
+    elif privilege == 'approve':
+        users = Users.objects.filter(Q(id=company.approve_id), Q(company_id=companyId))
+    elif privilege == 'reimburse':
+        users = Users.objects.filter(Q(id=company.reimburse_id), Q(company_id=companyId))
+
+    userData = getUserData(users)
+    
+    return Response(data={'success': True, 'data': userData}, status=status.HTTP_200_OK)

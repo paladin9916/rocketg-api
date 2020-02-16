@@ -12,6 +12,8 @@ urlpatterns = [
 
     path('admin/companies', company.componyGetSave),
     path('admin/companies/<int:pk>', company.componyUpdate),
+    path('admin/companies/<int:pk>/special_privilege', company.specialUsers),
+    path('admin/companies/<int:pk>/special_privilege/<slug:privilege>', company.specialUser),
 
     path('admin/users', user.userGetSave),
     path('admin/users/<int:pk>', user.userDetailUpdate),
@@ -20,9 +22,6 @@ urlpatterns = [
 
     path('admin/industries', industry.industryGet),
     path('admin/countries', country.countryGet),
-
-    path('admin/companies/<int:pk>/special_privilege', user.specialUsers),
-    path('admin/companies/<int:pk>/special_privilege/<slug:privilege>', user.specialUser),
 
     path('user/expenses_month', expense.expenseMonthList),
     path('user/expenses_month/<int:month>', expense.expenseByMonth),
