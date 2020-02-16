@@ -244,7 +244,7 @@ def getUserData(users):
             "avatar_url": user.avatar,
             "company_id": user.company_id,
             "reimbursement_cycle": user.reimbursement_cycle,
-            "payments_currency": user.payments_currency,
+            "payments_currency": user.payments_currency
         }
         users_data.append(user_data)
 
@@ -269,7 +269,7 @@ def getUserDataWithPW(users):
             "avatar_url": user.avatar,
             "company_id": user.company_id,
             "reimbursement_cycle": user.reimbursement_cycle,
-            "payments_currency": user.payments_currency,
+            "payments_currency": user.payments_currency
         }
         users_data.append(user_data)
 

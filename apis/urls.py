@@ -12,6 +12,8 @@ urlpatterns = [
 
     path('admin/companies', company.componyGetSave),
     path('admin/companies/<int:pk>', company.componyUpdate),
+    path('admin/companies/<int:pk>/special_privilege', company.specialUsers),
+    path('admin/companies/<int:pk>/special_privilege/<slug:privilege>', company.specialUser),
 
     path('admin/users', user.userGetSave),
     path('admin/users/<int:pk>', user.userDetailUpdate),
