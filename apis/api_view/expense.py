@@ -482,6 +482,9 @@ def expenseUpdate(request, pk):
 
         assignees = assignees.split(",")
 
+        if assignees == None or len(assignees) == 0 or (len(assignees) == 1 and assignees[0] == ''):
+            assignees = []
+
         defaultAssignees = list(map(int, defaultAssignees))
         assignees = list(map(int, assignees))
 
