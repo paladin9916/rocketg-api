@@ -178,11 +178,11 @@ def specialUsers(request, pk):
         for user in userData:
             if user["id"] == company.open_user_id:
                 data["open"] = user
-            elif user["id"] == company.processing_id:
+            if user["id"] == company.processing_id:
                 data["processing"] = user
-            elif user["id"] == company.approve_id:
+            if user["id"] == company.approve_id:
                 data["approve"] = user
-            elif user["id"] == company.reimburse_id:
+            if user["id"] == company.reimburse_id:
                 data["reimburse"] = user
         
         return Response(data={'success': True, 'data': data}, status=status.HTTP_200_OK)
