@@ -340,7 +340,7 @@ def expenseSave(request):
         assignees = list(map(int, assignees))
 
         assignees = list(set(defaultAssignees) | set(assignees))
-        assignees = ','.join(str(x) for x in assignees)        
+        assignees = ','.join(str(x) for x in assignees)
 
         expense = Expenses(
             merchant_name=merchant_name,
@@ -472,13 +472,13 @@ def expenseUpdate(request, pk):
         company = Companies.objects.get(pk=company_id)
         defaultAssignees = []
         if company.open_user_id != None:
-            objAssignees.append(company.open_user_id)
+            defaultAssignees.append(company.open_user_id)
         if company.processing_id != None:
-            objAssignees.append(company.processing_id)
+            defaultAssignees.append(company.processing_id)
         if company.approve_id != None:
-            objAssignees.append(company.approve_id)
+            defaultAssignees.append(company.approve_id)
         if company.reimburse_id != None:
-            objAssignees.append(company.reimburse_id)
+            defaultAssignees.append(company.reimburse_id)
 
         assignees = assignees.split(",")
 
