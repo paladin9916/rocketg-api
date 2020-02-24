@@ -6,11 +6,10 @@ from rest_framework.response import Response
 from django.core.files.storage import FileSystemStorage
 
 from apis.api_view.utility import *
-from apis.models import Expenses, Users
+from apis.models import Expenses, Users, Companies
 from django.db.models import Q, Sum
 
 from django.utils import translation
-
 
 @api_view(['GET'])
 def expenseMonthList(request):
@@ -321,6 +320,27 @@ def expenseSave(request):
         statusNum = request.data.get('status')
 
         user = Users.objects.get(pk=user_id)
+        company = Companies.objects.get(pk=company_id)
+        defaultAssignees = []
+        if company.open_user_id != None:
+            defaultAssignees.append(company.open_user_id)
+        if company.processing_id != None:
+            defaultAssignees.append(company.processing_id)
+        if company.approve_id != None:
+            defaultAssignees.append(company.approve_id)
+        if company.reimburse_id != None:
+            defaultAssignees.append(company.reimburse_id)
+
+        assignees = assignees.split(",")
+
+        if assignees == None or len(assignees) == 0 or (len(assignees) == 1 and assignees[0] == ''):
+            assignees = []
+
+        defaultAssignees = list(map(int, defaultAssignees))
+        assignees = list(map(int, assignees))
+
+        assignees = list(set(defaultAssignees) | set(assignees))
+        assignees = ','.join(str(x) for x in assignees)
 
         expense = Expenses(
             merchant_name=merchant_name,
@@ -449,6 +469,27 @@ def expenseUpdate(request, pk):
         statusNum = request.data.get('status')
 
         user = Users.objects.get(pk=user_id)
+        company = Companies.objects.get(pk=company_id)
+        defaultAssignees = []
+        if company.open_user_id != None:
+            defaultAssignees.append(company.open_user_id)
+        if company.processing_id != None:
+            defaultAssignees.append(company.processing_id)
+        if company.approve_id != None:
+            defaultAssignees.append(company.approve_id)
+        if company.reimburse_id != None:
+            defaultAssignees.append(company.reimburse_id)
+
+        assignees = assignees.split(",")
+
+        if assignees == None or len(assignees) == 0 or (len(assignees) == 1 and assignees[0] == ''):
+            assignees = []
+
+        defaultAssignees = list(map(int, defaultAssignees))
+        assignees = list(map(int, assignees))
+
+        assignees = list(set(defaultAssignees) | set(assignees))
+        assignees = ','.join(str(x) for x in assignees)
 
         expense.merchant_name = merchant_name
         expense.receipt_date = receipt_date
