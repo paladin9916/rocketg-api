@@ -40,8 +40,8 @@ staging:
 production:
   stage: deploy
   script:
-  - apt-get update -qy
-  - apt-get install -y python3-dev python3-pip
+  - sudo apt-get update -qy
+  - sudo apt-get install -y python3-dev python3-pip
   - sudo find /home/ec2-user/py-api/rocketg-api-python/. -maxdepth 1 ! -name media ! -name . -exec rm -rv {} \;
   - sudo mv ./* /home/ec2-user/py-api/rocketg-api-python/
   - source /home/ec2-user/py-api/venv/bin/activate
