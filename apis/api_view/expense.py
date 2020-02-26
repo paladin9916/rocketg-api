@@ -451,17 +451,7 @@ def expenseUpdate(request, pk):
             expense.status = statusNum
             expense.payments_currency = user.payments_currency
         else:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK)
-
-        defaultAssignees = []
-        if company.open_user_id != None:
-            defaultAssignees.append(company.open_user_id)
-        if company.processing_user_id != None:
-            defaultAssignees.append(company.processing_user_id)
-        if company.approve_user_id != None:
-            defaultAssignees.append(company.approve_user_id)
-        if company.reimburse_user_id != None:
-            defaultAssignees.append(company.reimburse_user_id)        
+            return Response(data={'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK) 
 
         try:
             expense.save()
