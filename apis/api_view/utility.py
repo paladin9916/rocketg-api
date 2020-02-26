@@ -95,12 +95,14 @@ def getReportIdsForAssignee(assignee, status):
     if status != None:
         totalForReport = Expenses.objects.filter(
             Q(status=status),
-            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ",") 
+            | Q(open_user_id=assignee) | Q(processing_user_id=assignee) | Q(approve_user_id=assignee) | Q(reimburse_user_id=assignee))).values(
             'report_id').distinct()
     else:
         totalForReport = Expenses.objects.filter(
             Q(status__gt=0),
-            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ",")
+            | Q(open_user_id=assignee) | Q(processing_user_id=assignee) | Q(approve_user_id=assignee) | Q(reimburse_user_id=assignee))).values(
             'report_id').distinct()
 
     return totalForReport
@@ -108,7 +110,8 @@ def getReportIdsForAssignee(assignee, status):
 def getCountForStatus(assignee, status):
     countData = Expenses.objects.filter(
             Q(status=status),
-            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ",")
+            | Q(open_user_id=assignee) | Q(processing_user_id=assignee) | Q(approve_user_id=assignee) | Q(reimburse_user_id=assignee))).values(
             'company_id').annotate(count=Count('id'))
         
     if len(countData) == 0:
@@ -123,14 +126,16 @@ def getTotalForReports(ids, assignee = None, status = None):
             totalForReport = Expenses.objects.filter(
             Q(report_id__in=ids),
             Q(status=status),
-            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ",")
+            | Q(open_user_id=assignee) | Q(processing_user_id=assignee) | Q(approve_user_id=assignee) | Q(reimburse_user_id=assignee))).values(
             'report_id', 
             'currency_type').annotate(total_amount=Sum('total_amount'), count=Count('id'))
         else:
             totalForReport = Expenses.objects.filter(
             Q(report_id__in=ids),
             Q(status__gt=0),
-            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ",")
+            | Q(open_user_id=assignee) | Q(processing_user_id=assignee) | Q(approve_user_id=assignee) | Q(reimburse_user_id=assignee))).values(
             'report_id', 
             'currency_type').annotate(total_amount=Sum('total_amount'), count=Count('id'))
         

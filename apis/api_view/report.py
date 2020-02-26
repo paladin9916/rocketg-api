@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from array import *
+from django.db.models import Q
 
 from apis.api_view.utility import getReportDetail, getReportData as utGetReportData, getUsersWithIds, getTotalForReports, exchangeMoney, getReportIdsForAssignee
 from apis.models import Reports, Users
@@ -70,7 +71,7 @@ def reportList(request):
         wants_currency = 3
 
     if userId != None:
-        oReports = Reports.objects.filter(user_id=userId)
+        oReports = Reports.objects.filter(Q(user_id=userId))
         if order_by != None:
             oReports = oReports.order_by(order_by)
         
@@ -84,7 +85,7 @@ def reportList(request):
         
     elif assigneeId != None:
         report_ids = getReportIdsForAssignee(assigneeId, expense_status)
-        oReports = Reports.objects.filter(id__in=report_ids)
+        oReports = Reports.objects.filter(Q(id__in=report_ids))
         if order_by != None:
             oReports = oReports.order_by(order_by)
 
