@@ -450,7 +450,7 @@ def expenseUpdate(request, pk):
             expense.company_id = company_id
             expense.status = statusNum
             expense.payments_currency = user.payments_currency
-        else
+        else:
             return Response(data={'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK)
 
         defaultAssignees = []
