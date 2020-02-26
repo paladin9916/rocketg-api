@@ -137,40 +137,28 @@ def expenseUpdate(request, pk):
         user = Users.objects.get(pk=user_id)
         company = Companies.objects.get(pk=company_id)
 
+        expense.merchant_name = merchant_name
+        expense.receipt_date = receipt_date
+        expense.description = description
+        expense.total_amount = total_amount
+        expense.currency_type = currency_type
+        expense.category = category
+        expense.assignees = assignees
+        expense.file_urls = file_urls
+        expense.file_names = file_names
+        expense.user_id = user_id
+        expense.report_id = report_id
+        expense.company_id = company_id
+        expense.status = statusNum
+        expense.payments_currency = user.payments_currency
+
         if statusNum == 0:
-            expense.merchant_name = merchant_name
-            expense.receipt_date = receipt_date
-            expense.description = description
-            expense.total_amount = total_amount
-            expense.currency_type = currency_type
-            expense.category = category
-            expense.assignees = assignees
-            expense.file_urls = file_urls
-            expense.file_names = file_names
-            expense.user_id = user_id
-            expense.report_id = report_id
-            expense.company_id = company_id
-            expense.status = statusNum
-            expense.payments_currency = user.payments_currency
+            None
         elif statusNum == 1:
-            expense.merchant_name = merchant_name
-            expense.receipt_date = receipt_date
-            expense.description = description
-            expense.total_amount = total_amount
-            expense.currency_type = currency_type
-            expense.category = category
-            expense.assignees = assignees
-            expense.file_urls = file_urls
-            expense.file_names = file_names
-            expense.user_id = user_id
             expense.open_user_id = company.open_user_id,
             expense.processing_user_id = company.processing_user_id,
             expense.approve_user_id = company.approve_user_id,
             expense.reimburse_user_id = company.reimburse_user_id,
-            expense.report_id = report_id
-            expense.company_id = company_id
-            expense.status = statusNum
-            expense.payments_currency = user.payments_currency
         else:
             return Response(data={'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK) 
 
