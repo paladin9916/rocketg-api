@@ -324,12 +324,12 @@ def expenseSave(request):
         defaultAssignees = []
         if company.open_user_id != None:
             defaultAssignees.append(company.open_user_id)
-        if company.processing_id != None:
-            defaultAssignees.append(company.processing_id)
-        if company.approve_id != None:
-            defaultAssignees.append(company.approve_id)
-        if company.reimburse_id != None:
-            defaultAssignees.append(company.reimburse_id)
+        if company.processing_user_id != None:
+            defaultAssignees.append(company.processing_user_id)
+        if company.approve_user_id != None:
+            defaultAssignees.append(company.approve_user_id)
+        if company.reimburse_user_id != None:
+            defaultAssignees.append(company.reimburse_user_id)
 
         assignees = assignees.split(",")
 
@@ -473,12 +473,12 @@ def expenseUpdate(request, pk):
         defaultAssignees = []
         if company.open_user_id != None:
             defaultAssignees.append(company.open_user_id)
-        if company.processing_id != None:
-            defaultAssignees.append(company.processing_id)
-        if company.approve_id != None:
-            defaultAssignees.append(company.approve_id)
-        if company.reimburse_id != None:
-            defaultAssignees.append(company.reimburse_id)
+        if company.processing_user_id != None:
+            defaultAssignees.append(company.processing_user_id)
+        if company.approve_user_id != None:
+            defaultAssignees.append(company.approve_user_id)
+        if company.reimburse_user_id != None:
+            defaultAssignees.append(company.reimburse_user_id)
 
         assignees = assignees.split(",")
 
