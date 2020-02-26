@@ -277,7 +277,8 @@ def expensesInReport(request, report):
 
     if assigneeId != None:
         assignee = assigneeId
-        oExpense = oExpense.filter(Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))
+        oExpense = oExpense.filter(Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ",")
+        | Q(open_user_id=assignee) | Q(processing_user_id=assignee) | Q(approve_user_id=assignee) | Q(reimburse_user_id=assignee))
 
     if order_by != None:
         oExpense = oExpense.order_by(order_by)
