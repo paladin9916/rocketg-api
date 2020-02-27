@@ -39,20 +39,19 @@ def signIn(request):
                             status=status.HTTP_200_OK)
 
         # Auth Token
-        token_key = binascii.hexlify(os.urandom(20)).decode()
-        login_user.tokens = token_key
-        login_user.confirmation_token = token_key
-        login_user.save()
+        client = binascii.hexlify(os.urandom(20)).decode()
         # Session
-        request.session['token'] = token_key
+        request.session['client'] = client
+        request.session['uid'] = login_user.uid
+        print(123)
+        print(request.session.session_key)
         resultUserData = getUserData([login_user, ])[0]
-        return Response(data={'success': True, 'data': resultUserData}, status=status.HTTP_200_OK, headers={'access-token': token_key, 'client': login_user.provider, 'uid': login_user.uid})
+        return Response(data={'success': True, 'data': resultUserData}, status=status.HTTP_200_OK, headers={'client': client, 'uid': login_user.uid})
 
 
 @api_view(['DELETE'])
 def signOut(request):
     if request.method == 'DELETE':
-        token = request.headers.get('access-token')
         client = request.headers.get('client')
         uid = request.headers.get('uid')
         lang = request.headers.get('lang')
@@ -64,12 +63,13 @@ def signOut(request):
         elif lang is None or lang == '':
             lang = 'en'
  
-        # try:
-        #     # Users.objects.get(tokens=token)
-        #     del request.session['token']
-        # except Users.DoesNotExist:
-        #     return Response(data={'success': False, 'error': [translation.gettext('Error in signing out')]},
-        #                     status=status.HTTP_200_OK)
+        try:
+            if uid == request.session['uid'] and client == request.session['client']:
+                del request.session['uid']
+                del request.session['client']
+        except KeyError:
+            return Response(data={'success': False, 'error': [translation.gettext('Error in signing out')]},
+                            status=status.HTTP_200_OK)
 
         return Response(data={'success': True}, status=status.HTTP_200_OK)
 
