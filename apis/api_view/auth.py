@@ -28,8 +28,8 @@ def signIn(request):
         elif lang is None or lang == '':
             lang = 'en'
 
-        email = request.data.get('email')
-        password = request.data.get('password')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
         salt = settings.SECRET_KEY
         encrypted_pw = make_password(password, salt=salt)
         try:
@@ -43,8 +43,6 @@ def signIn(request):
         # Session
         request.session['client'] = client
         request.session['uid'] = login_user.uid
-        print(123)
-        print(request.session.session_key)
         resultUserData = getUserData([login_user, ])[0]
         return Response(data={'success': True, 'data': resultUserData}, status=status.HTTP_200_OK, headers={'client': client, 'uid': login_user.uid})
 
@@ -68,8 +66,9 @@ def signOut(request):
                 del request.session['uid']
                 del request.session['client']
         except KeyError:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in signing out')]},
-                            status=status.HTTP_200_OK)
+            return Response(data={'success': True}, status=status.HTTP_200_OK)
+            # return Response(data={'success': False, 'error': [translation.gettext('Error in signing out')]},
+            #                 status=status.HTTP_200_OK)
 
         return Response(data={'success': True}, status=status.HTTP_200_OK)
 
@@ -77,7 +76,7 @@ def signOut(request):
 @api_view(['POST'])
 def checkEmail(request):
     if request.method == 'POST':
-        email = request.data.get('email')
+        email = request.POST.get('email')
         lang = request.headers.get('lang')
         if lang is not None:
             if lang == 'zh':

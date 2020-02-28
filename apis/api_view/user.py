@@ -65,18 +65,18 @@ def userGetSave(request):
         return Response(data={'success': True, 'data': userData, 'totalRowCount': total_count},
                         status=status.HTTP_200_OK)
     elif request.method == 'POST':
-        email = request.data.get('email')
-        firstname = request.data.get('firstname')
-        lastname = request.data.get('lastname')
-        phone = request.data.get('phone')
-        jobTitle = request.data.get('job_title')
-        department = request.data.get('department')
-        language = request.data.get('language')
-        roleId = request.data.get('role_id')
-        companyId = request.data.get('company_id')
-        avatar = request.data.get('avatar')
-        reimbursementCycle = request.data.get('reimbursement_cycle')
-        paymentsCurrency = request.data.get('payments_currency')
+        email = request.POST.get('email')
+        firstname = request.POST.get('firstname')
+        lastname = request.POST.get('lastname')
+        phone = request.POST.get('phone')
+        jobTitle = request.POST.get('job_title')
+        department = request.POST.get('department')
+        language = request.POST.get('language')
+        roleId = int(request.POST.get('role_id'))
+        companyId = int(request.POST.get('company_id'))
+        avatar = request.POST.get('avatar')
+        reimbursementCycle = int(request.POST.get('reimbursement_cycle'))
+        paymentsCurrency = int(request.POST.get('payments_currency'))
 
         try:
             if Users.objects.get(email=email):
@@ -144,19 +144,19 @@ def userDetailUpdate(request, pk):
         userData = getUserData([user, ])
         return Response(data={'success': True, 'data': userData}, status=status.HTTP_200_OK)
     elif request.method == 'PUT':
-        email = request.data.get('email')
-        # password = request.data.get('password')
-        firstname = request.data.get('firstname')
-        lastname = request.data.get('lastname')
-        phone = request.data.get('phone')
-        jobTitle = request.data.get('job_title')
-        department = request.data.get('department')
-        language = request.data.get('language')
-        roleId = request.data.get('role_id')
-        companyId = request.data.get('company_id')
-        avatar = request.data.get('avatar')
-        reimbursementCycle = request.data.get('reimbursement_cycle')
-        paymentsCurrency = request.data.get('payments_currency')
+        email = request.POST.get('email')
+        # password = request.POST.get('password')
+        firstname = request.POST.get('firstname')
+        lastname = request.POST.get('lastname')
+        phone = request.POST.get('phone')
+        jobTitle = request.POST.get('job_title')
+        department = request.POST.get('department')
+        language = request.POST.get('language')
+        roleId = int(request.POST.get('role_id'))
+        companyId = int(request.POST.get('company_id'))
+        avatar = request.POST.get('avatar')
+        reimbursementCycle = int(request.POST.get('reimbursement_cycle'))
+        paymentsCurrency = int(request.POST.get('payments_currency'))
 
         try:
             if Users.objects.get(~Q(id=pk), Q(email=email)):
@@ -202,7 +202,7 @@ def userDetailUpdate(request, pk):
 @api_view(['POST'])
 def resetPassword(request):
     if request.method == 'POST':
-        userId = request.data.get('user_id')
+        userId = request.POST.get('user_id')
         lang = request.headers.get('lang')
         if lang is not None:
             if lang == 'zh':

@@ -26,19 +26,19 @@ def expenseSave(request):
         lang = 'en'
 
     if request.method == 'POST':
-        merchant_name = request.data.get('merchant_name')
-        receipt_date = request.data.get('receipt_date')
-        description = request.data.get('description')
-        total_amount = request.data.get('total_amount')
-        currency_type = request.data.get('currency_type')
-        category = request.data.get('category')
-        assignees = request.data.get('assignees')
-        file_urls = request.data.get('file_urls')
-        file_names = request.data.get('file_names')
-        user_id = request.data.get('user_id')
-        report_id = request.data.get('report_id')
-        company_id = request.data.get('company_id')
-        statusNum = request.data.get('status')
+        merchant_name = request.POST.get('merchant_name')
+        receipt_date = request.POST.get('receipt_date')
+        description = request.POST.get('description')
+        total_amount = float(request.POST.get('total_amount'))
+        currency_type = int(request.POST.get('currency_type'))
+        category = int(request.POST.get('category'))
+        assignees = request.POST.get('assignees')
+        file_urls = request.POST.get('file_urls')
+        file_names = request.POST.get('file_names')
+        user_id = int(request.POST.get('user_id'))
+        report_id = int(request.POST.get('report_id'))
+        company_id = int(request.POST.get('company_id'))
+        statusNum = int(request.POST.get('status'))
 
         user = Users.objects.get(pk=user_id)
         company = Companies.objects.get(pk=company_id)
@@ -120,19 +120,19 @@ def expenseUpdate(request, pk):
             return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
                         status=status.HTTP_200_OK)
         
-        merchant_name = request.data.get('merchant_name')
-        receipt_date = request.data.get('receipt_date')
-        description = request.data.get('description')
-        total_amount = request.data.get('total_amount')
-        currency_type = request.data.get('currency_type')
-        category = request.data.get('category')
-        assignees = request.data.get('assignees')
-        file_urls = request.data.get('file_urls')
-        file_names = request.data.get('file_names')
-        user_id = request.data.get('user_id')
-        report_id = request.data.get('report_id')
-        company_id = request.data.get('company_id')
-        statusNum = request.data.get('status')
+        merchant_name = request.POST.get('merchant_name')
+        receipt_date = request.POST.get('receipt_date')
+        description = request.POST.get('description')
+        total_amount = float(request.POST.get('total_amount'))
+        currency_type = int(request.POST.get('currency_type'))
+        category = int(request.POST.get('category'))
+        assignees = request.POST.get('assignees')
+        file_urls = request.POST.get('file_urls')
+        file_names = request.POST.get('file_names')
+        user_id = int(request.POST.get('user_id'))
+        report_id = int(request.POST.get('report_id'))
+        company_id = int(request.POST.get('company_id'))
+        statusNum = int(request.POST.get('status'))
 
         user = Users.objects.get(pk=user_id)
         company = Companies.objects.get(pk=company_id)
@@ -207,8 +207,8 @@ def expenseChangeStatus(request):
         lang = 'en'
 
     if request.method == 'POST':
-        id = request.data.get('id')
-        statusNum = request.data.get('status')
+        id = int(request.POST.get('id'))
+        statusNum = int(request.POST.get('status'))
 
         try:
             expense = Expenses.objects.get(id=id)
@@ -240,7 +240,7 @@ def expenseCount(request):
         lang = 'en'
 
     assigneeId = request.query_params.get('assignee_id')
-    user_id = request.data.get('user_id')
+    user_id = request.query_params.get('user_id')
     expense_status = request.query_params.get('status')
     
     countData = getCountForStatus(assigneeId, expense_status)

@@ -21,8 +21,8 @@ def reportSave(request):
     elif lang is None or lang == '':
         lang = 'en'
 
-    comment = request.data.get('comment')
-    user_id = request.data.get('user_id')
+    comment = request.POST.get('comment')
+    int(user_id = request.POST.get('user_id'))
     
     user = Users.objects.get(pk=user_id)
 
