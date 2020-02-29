@@ -5,9 +5,7 @@ import requests
 from django.db.models import Q, Sum, Count
 
 from apis.api_view import constants
-# from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users, ExpenseFile
 from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users
-# from apis.serializers import ImageSerializer, ExpenseFileSerializer
 from apis.serializers import ImageSerializer
 
 def getExpenseData(expenses, wants_currency):
@@ -25,6 +23,7 @@ def getExpenseData(expenses, wants_currency):
             "file_urls": expense.file_urls,
             "file_names": expense.file_names,
             "company_id": expense.company_id,
+            "report_id": expense.report_id,
             "currency_type": expense.currency_type,
             "status": expense.status,
             "created_at": expense.created_at,
@@ -33,11 +32,24 @@ def getExpenseData(expenses, wants_currency):
             "assignees_ids": assignees,
             "payments_currency": expense.payments_currency,
             "payments_amount": exchangeMoney(expense.total_amount, expense.currency_type, expense.payments_currency),
-            "user_id": expense.user_id
+            "user_id": expense.user_id,
+            "open_user_id": expense.open_user_id,
+            "processing_user_id": expense.processing_user_id,
+            "approve_user_id": expense.approve_user_id,
+            "reimburse_user_id": expense.reimburse_user_id,
         }
 
         expensesList.append(expenseData)
         user_ids.append(int(expense.user_id))
+        if expense.open_user_id != None:
+            user_ids.append(int(expense.open_user_id))
+        if expense.processing_user_id != None:
+            user_ids.append(int(expense.processing_user_id))
+        if expense.approve_user_id != None:
+            user_ids.append(int(expense.approve_user_id))
+        if expense.reimburse_user_id != None:
+            user_ids.append(int(expense.reimburse_user_id))
+
         user_ids += assignees
 
     users = getUsersWithIds(user_ids)
@@ -51,6 +63,22 @@ def getExpenseData(expenses, wants_currency):
             assignee = [u for u in users if u.id == int(assignee_id)]
             assignee = getUserData(assignee)
             expense["assignees"].append(assignee[0])
+        if expense["open_user_id"] != None:
+            open_user = [u for u in users if u.id == expense["open_user_id"]]
+            open_user = getUserData(open_user)
+            expense["open_user"] = open_user[0]
+        if expense["processing_user_id"] != None:
+            processing_user = [u for u in users if u.id == expense["processing_user_id"]]
+            processing_user = getUserData(processing_user)
+            expense["processing_user"] = processing_user[0]
+        if expense["approve_user_id"] != None:
+            approve_user = [u for u in users if u.id == expense["approve_user_id"]]
+            approve_user = getUserData(approve_user)
+            expense["approve_user"] = approve_user[0]
+        if expense["reimburse_user_id"] != None:
+            reimburse_user = [u for u in users if u.id == expense["reimburse_user_id"]]
+            reimburse_user = getUserData(reimburse_user)
+            expense["reimburse_user"] = reimburse_user[0]
 
         expensesData.append(expense)
 
@@ -68,12 +96,14 @@ def getReportIdsForAssignee(assignee, status):
     if status != None:
         totalForReport = Expenses.objects.filter(
             Q(status=status),
-            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ",") 
+            | Q(open_user_id=assignee) | Q(processing_user_id=assignee) | Q(approve_user_id=assignee) | Q(reimburse_user_id=assignee))).values(
             'report_id').distinct()
     else:
         totalForReport = Expenses.objects.filter(
             Q(status__gt=0),
-            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ",")
+            | Q(open_user_id=assignee) | Q(processing_user_id=assignee) | Q(approve_user_id=assignee) | Q(reimburse_user_id=assignee))).values(
             'report_id').distinct()
 
     return totalForReport
@@ -81,7 +111,8 @@ def getReportIdsForAssignee(assignee, status):
 def getCountForStatus(assignee, status):
     countData = Expenses.objects.filter(
             Q(status=status),
-            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ",")
+            | Q(open_user_id=assignee) | Q(processing_user_id=assignee) | Q(approve_user_id=assignee) | Q(reimburse_user_id=assignee))).values(
             'company_id').annotate(count=Count('id'))
         
     if len(countData) == 0:
@@ -96,14 +127,16 @@ def getTotalForReports(ids, assignee = None, status = None):
             totalForReport = Expenses.objects.filter(
             Q(report_id__in=ids),
             Q(status=status),
-            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ",")
+            | Q(open_user_id=assignee) | Q(processing_user_id=assignee) | Q(approve_user_id=assignee) | Q(reimburse_user_id=assignee))).values(
             'report_id', 
             'currency_type').annotate(total_amount=Sum('total_amount'), count=Count('id'))
         else:
             totalForReport = Expenses.objects.filter(
             Q(report_id__in=ids),
             Q(status__gt=0),
-            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ","))).values(
+            (Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ",")
+            | Q(open_user_id=assignee) | Q(processing_user_id=assignee) | Q(approve_user_id=assignee) | Q(reimburse_user_id=assignee))).values(
             'report_id', 
             'currency_type').annotate(total_amount=Sum('total_amount'), count=Count('id'))
         
@@ -158,42 +191,6 @@ def getReportData(reports):
         reportsData.append(reportData)
     
     return reportsData
-
-# def getExpenseData(expenseList, half):
-#     expenses_data = []
-#     for expense in expenseList:
-#         user = Users.objects.get(id=expense.user_id)
-#         image = Images.objects.filter(user_id=expense.user_id)[0]
-#         expense_data = {
-#             "id": expense.id,
-#             "merchant_name": expense.merchant_name,
-#             "receipt_date": expense.receipt_date,
-#             "description": expense.description,
-#             "total_amount": expense.total_amount,
-#             "converted_amount": 0,
-#             "category": expense.category,
-#             "assignees": expense.assignees,
-#             "file_urls": expense.file_urls,
-#             "file_names": expense.file_names,
-#             "user_id": expense.user_id,
-#             "company_id": expense.company_id,
-#             "currency_type": expense.currency_type,
-#             "status": expense.status,
-#             "created_at": expense.created_at,
-#             "updated_at": expense.updated_at,
-#             "user": {
-#                 "id": user.id,
-#                 "firstname": user.firstname,
-#                 "lastname": user.lastname,
-#                 "avatar_url": image.avatar.name,
-#                 "job_title": user.job_title,
-#             },
-#             "half": half,
-#         }
-#         expenses_data.append(expense_data)
-
-#     return expenses_data
-
 
 def getIndustryData(industryList):
     industries_data = []
@@ -291,7 +288,12 @@ def getExpenseDetail(expenses):
             "file_urls": expense.file_urls,
             "file_names": expense.file_names,
             "user_id": expense.user_id,
+            "open_user_id": expense.open_user_id,
+            "processing_user_id": expense.processing_user_id,
+            "approve_user_id": expense.approve_user_id,
+            "reimburse_user_id": expense.reimburse_user_id,
             "company_id": expense.company_id,
+            "report_id": expense.report_id,
             "status": expense.status,
             "payments_currency": expense.payments_currency,
             "currency_type": expense.currency_type,
@@ -357,7 +359,6 @@ def getCompanyData(companies, lang):
 
     return companies_data
 
-
 def uploadImage(userId, imageInfo):
     try:
         image = Images.objects.get(user_id=userId)
@@ -369,151 +370,6 @@ def uploadImage(userId, imageInfo):
         image_serializer.save()
 
     return image_serializer
-
-
-# def uploadExpenseFile(expenseId, expenseInfo):        
-#     try:
-#         file1 = ExpenseFile.objects.get(expense_id=expenseId)
-#         file_serializer = ExpenseFileSerializer(file1, data=expenseInfo)
-#     except ExpenseFile.DoesNotExist:
-#         file_serializer = ExpenseFileSerializer(data=expenseInfo)
-
-#     if file_serializer.is_valid():
-#         file_serializer.save()
-
-#     return file_serializer
-
-
-def first_day_in_month(year, month, type):
-    if type == 2:
-        return datetime.datetime(year, month, 16)
-    else:
-        return datetime.datetime(year, month, 1)
-
-
-def last_day_in_month(year, month, type):
-    lastDay = calendar.monthrange(year, month)[1]  # last day of month
-    if type == 1:
-        return datetime.datetime(year, month, 15)
-    else:
-        return datetime.datetime(year, month, lastDay)
-
-
-def getExpenseByMonth(startDate, endDate, userId, assignerId):
-    if userId:
-        dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                              Q(receipt_date__lte=endDate), Q(status__gt=0))
-    elif assignerId:
-        dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                              Q(receipt_date__lte=endDate), Q(status__gt=0), (
-                                                      Q(assignees=assignerId) | Q(
-                                                  assignees__startswith=assignerId) | Q(
-                                                  assignees__contains=assignerId) | Q(
-                                                  assignees__endswith=assignerId)))
-    return dataByMonth
-
-
-def getExpenseByMonthStatus(startDate, endDate, userId, assignerId, exp_status, order_by):
-    if userId:
-        if order_by == 0:
-            dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                  Q(receipt_date__lte=endDate), Q(status=exp_status)).order_by('-receipt_date')
-        elif order_by == 1:
-            dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                  Q(receipt_date__lte=endDate), Q(status=exp_status)).order_by('receipt_date')
-        elif order_by == 2:
-            dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                  Q(receipt_date__lte=endDate), Q(status=exp_status)).order_by('merchant_name')
-    elif assignerId:
-        if order_by == 0:
-            dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                  Q(receipt_date__lte=endDate), Q(status=exp_status), (
-                                                          Q(assignees=assignerId) | Q(
-                                                      assignees__startswith=assignerId) | Q(
-                                                      assignees__contains=assignerId) | Q(
-                                                      assignees__endswith=assignerId))).order_by('-receipt_date')
-        elif order_by == 1:
-            dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                  Q(receipt_date__lte=endDate), Q(status=exp_status), (
-                                                          Q(assignees=assignerId) | Q(
-                                                      assignees__startswith=assignerId) | Q(
-                                                      assignees__contains=assignerId) | Q(
-                                                      assignees__endswith=assignerId))).order_by('receipt_date')
-        elif order_by == 2:
-            dataByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                  Q(receipt_date__lte=endDate), Q(status=exp_status), (
-                                                          Q(assignees=assignerId) | Q(
-                                                      assignees__startswith=assignerId) | Q(
-                                                      assignees__contains=assignerId) | Q(
-                                                      assignees__endswith=assignerId))).order_by('merchant_name')
-    return dataByMonth
-
-
-def getMonthInfoForExpenses(startDate, endDate, userId, assignerId):
-    if userId:
-        expensesByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                  Q(receipt_date__lte=endDate), Q(status__gt=0)).values(
-            'currency_type').annotate(total_amount=Sum('total_amount'))
-    elif assignerId:
-        expensesByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                  Q(receipt_date__lte=endDate), Q(status__gt=0), (
-                                                              Q(assignees=assignerId) | Q(
-                                                          assignees__startswith=assignerId) | Q(
-                                                          assignees__contains=assignerId) | Q(
-                                                          assignees__endswith=assignerId))).values(
-            'currency_type').annotate(total_amount=Sum('total_amount'))
-    return expensesByMonth
-
-
-def getMonthInfoCountForExpenses(startDate, endDate, userId, assignerId):
-    if userId:
-        expensesCountByMonth = list(
-            Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate)))
-    elif assignerId:
-        expensesCountByMonth = list(
-            Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate), (
-                        Q(assignees=assignerId) | Q(assignees__startswith=assignerId) | Q(
-                    assignees__contains=assignerId) | Q(assignees__endswith=assignerId))))
-    count = len(expensesCountByMonth)
-    return count
-
-
-def getMonthInfoForExpensesByStatus(startDate, endDate, userId, assignerId, expStatus):
-    if userId:
-        expensesByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                  Q(receipt_date__lte=endDate), Q(status=expStatus)).values(
-            'currency_type').annotate(total_amount=Sum('total_amount'))
-    elif assignerId:
-        expensesByMonth = Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate),
-                                                  Q(receipt_date__lte=endDate), Q(status=expStatus), (
-                                                              Q(assignees=assignerId) | Q(
-                                                          assignees__startswith=assignerId) | Q(
-                                                          assignees__contains=assignerId) | Q(
-                                                          assignees__endswith=assignerId))).values(
-            'currency_type').annotate(total_amount=Sum('total_amount'))
-
-    return expensesByMonth
-
-
-def getMonthInfoCountForExpensesByStatus(startDate, endDate, userId, assignerId, expStatus):
-    if userId:
-        expensesCountByMonth = list(
-            Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate), Q(status=expStatus)))
-    elif assignerId:
-        expensesCountByMonth = list(
-            Expenses.objects.filter(Q(user_id=userId), Q(receipt_date__gte=startDate), Q(receipt_date__lte=endDate), Q(status=expStatus), (
-                        Q(assignees=assignerId) | Q(assignees__startswith=assignerId) | Q(
-                    assignees__contains=assignerId) | Q(assignees__endswith=assignerId))))
-    count = len(expensesCountByMonth)
-    return count
-
-
-def getMonthTotalPrice(expensesByMonth, wants_currency):
-    total = 0
-    for expense in expensesByMonth:
-        total += exchangeMoney(expense['total_amount'], expense['currency_type'], wants_currency)
-    return total
-
 
 def exchangeMoney(money, fromNum, toNum):
     money = float(money)

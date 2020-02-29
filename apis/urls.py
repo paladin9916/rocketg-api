@@ -23,8 +23,6 @@ urlpatterns = [
     path('admin/industries', industry.industryGet),
     path('admin/countries', country.countryGet),
 
-    path('user/expenses_month', expense.expenseMonthList),
-    path('user/expenses_month/<int:month>', expense.expenseByMonth),
     path('user/expenses', expense.expenseSave),
     path('user/expenses/count', expense.expenseCount),
     path('user/expenses/<int:pk>', expense.expenseUpdate),

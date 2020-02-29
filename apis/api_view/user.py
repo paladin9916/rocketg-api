@@ -65,18 +65,18 @@ def userGetSave(request):
         return Response(data={'success': True, 'data': userData, 'totalRowCount': total_count},
                         status=status.HTTP_200_OK)
     elif request.method == 'POST':
-        email = request.data.get('email')
-        firstname = request.data.get('firstname')
-        lastname = request.data.get('lastname')
-        phone = request.data.get('phone')
-        jobTitle = request.data.get('job_title')
-        department = request.data.get('department')
-        language = request.data.get('language')
-        roleId = request.data.get('role_id')
-        companyId = request.data.get('company_id')
-        avatar = request.data.get('avatar')
-        reimbursementCycle = request.data.get('reimbursement_cycle')
-        paymentsCurrency = request.data.get('payments_currency')
+        email = request.POST.get('email')
+        firstname = request.POST.get('firstname')
+        lastname = request.POST.get('lastname')
+        phone = request.POST.get('phone')
+        jobTitle = request.POST.get('job_title')
+        department = request.POST.get('department')
+        language = request.POST.get('language')
+        roleId = int(request.POST.get('role_id'))
+        companyId = int(request.POST.get('company_id'))
+        avatar = request.POST.get('avatar')
+        reimbursementCycle = int(request.POST.get('reimbursement_cycle'))
+        paymentsCurrency = int(request.POST.get('payments_currency'))
 
         try:
             if Users.objects.get(email=email):
@@ -144,19 +144,19 @@ def userDetailUpdate(request, pk):
         userData = getUserData([user, ])
         return Response(data={'success': True, 'data': userData}, status=status.HTTP_200_OK)
     elif request.method == 'PUT':
-        email = request.data.get('email')
-        # password = request.data.get('password')
-        firstname = request.data.get('firstname')
-        lastname = request.data.get('lastname')
-        phone = request.data.get('phone')
-        jobTitle = request.data.get('job_title')
-        department = request.data.get('department')
-        language = request.data.get('language')
-        roleId = request.data.get('role_id')
-        companyId = request.data.get('company_id')
-        avatar = request.data.get('avatar')
-        reimbursementCycle = request.data.get('reimbursement_cycle')
-        paymentsCurrency = request.data.get('payments_currency')
+        email = request.POST.get('email')
+        # password = request.POST.get('password')
+        firstname = request.POST.get('firstname')
+        lastname = request.POST.get('lastname')
+        phone = request.POST.get('phone')
+        jobTitle = request.POST.get('job_title')
+        department = request.POST.get('department')
+        language = request.POST.get('language')
+        roleId = int(request.POST.get('role_id'))
+        companyId = int(request.POST.get('company_id'))
+        avatar = request.POST.get('avatar')
+        reimbursementCycle = int(request.POST.get('reimbursement_cycle'))
+        paymentsCurrency = int(request.POST.get('payments_currency'))
 
         try:
             if Users.objects.get(~Q(id=pk), Q(email=email)):
@@ -202,7 +202,7 @@ def userDetailUpdate(request, pk):
 @api_view(['POST'])
 def resetPassword(request):
     if request.method == 'POST':
-        userId = request.data.get('user_id')
+        userId = request.POST.get('user_id')
         lang = request.headers.get('lang')
         if lang is not None:
             if lang == 'zh':
@@ -226,78 +226,3 @@ def resetPassword(request):
                             status=status.HTTP_200_OK)
 
         return Response(data={'success': True, 'data': {"password": password}}, status=status.HTTP_200_OK)
-
-@api_view(['PUT', 'GET'])
-def specialUsers(request, pk):
-    companyId = pk
-    if request.method == 'PUT':
-        openUserId = request.data.get('open')
-        processingUserId = request.data.get('processing')
-        approveUserId = request.data.get('approve')
-        reimburseUserId = request.data.get('reimburse')
-        
-        Users.objects.filter(Q(company_id=companyId)).update(special_privilege=0)
-
-        if openUserId != None:
-            openUser = Users.objects.get(id=openUserId)
-
-            openUser.special_privilege = 1
-            openUser.save()
-
-
-        if processingUserId != None:
-            processingUser = Users.objects.get(id=processingUserId)
-
-            processingUser.special_privilege = 2
-            processingUser.save()
-            
-
-        if approveUserId != None:
-            approveUser = Users.objects.get(id=approveUserId)
-
-            approveUser.special_privilege = 3
-            approveUser.save()
-
-        if reimburseUserId != None:
-            reimburseUser = Users.objects.get(id=reimburseUserId)
-
-            reimburseUser.special_privilege = 4
-            reimburseUser.save()
-
-        return Response(data={'success': True}, status=status.HTTP_200_OK)
-
-    elif request.method == 'GET':
-        userIds = [1, 2, 3, 4]
-        users = Users.objects.filter(Q(special_privilege__in=userIds), Q(company_id=companyId))
-        userData = getUserData(users)
-
-        data = {}
-        for user in userData:
-            if user["special_privilege"] == 1:
-                data["open"] = user
-            elif user["special_privilege"] == 2:
-                data["processing"] = user
-            elif user["special_privilege"] == 3:
-                data["approve"] = user
-            elif user["special_privilege"] == 4:
-                data["reimburse"] = user
-        
-        return Response(data={'success': True, 'data': data}, status=status.HTTP_200_OK)
-
-@api_view(['GET'])
-def specialUser(request, pk, privilege):
-    companyId = pk
-
-    users = None
-    if privilege == 'open':
-        users = Users.objects.filter(Q(special_privilege=1), Q(company_id=companyId))
-    elif privilege == 'processing':
-        users = Users.objects.filter(Q(special_privilege=2), Q(company_id=companyId))
-    elif privilege == 'approve':
-        users = Users.objects.filter(Q(special_privilege=3), Q(company_id=companyId))
-    elif privilege == 'reimburse':
-        users = Users.objects.filter(Q(special_privilege=4), Q(company_id=companyId))
-
-    userData = getUserData(users)
-    
-    return Response(data={'success': True, 'data': userData}, status=status.HTTP_200_OK)

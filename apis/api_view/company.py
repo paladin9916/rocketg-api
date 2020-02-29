@@ -58,12 +58,12 @@ def componyGetSave(request):
         companyData = getCompanyData(companies, lang)
         return Response(data={'success': True, 'data': companyData, 'totalRowCount': total_count}, status=status.HTTP_200_OK)
     elif request.method == 'POST':
-        name = request.data.get('name')
-        website = request.data.get('website')
-        employee_count_index = request.data.get('employee_count_index')
-        user_id = request.data.get('user_id')
-        country_id = request.data.get('country_id')
-        industry_id = request.data.get('industry_id')
+        name = request.POST.get('name')
+        website = request.POST.get('website')
+        employee_count_index = int(request.POST.get('employee_count_index'))
+        user_id = int(request.POST.get('user_id'))
+        country_id = int(request.POST.get('country_id'))
+        industry_id = int(request.POST.get('industry_id'))
         company = Companies(name=name, website=website, employee_count_index=employee_count_index, user_id=user_id, country_id=country_id, industry_id=industry_id)
 
         try:
@@ -95,14 +95,14 @@ def componyUpdate(request, pk):
             return Response(data={'success': False, 'error': [translation.gettext('Company do not exist.')]},
                             status=status.HTTP_200_OK)
 
-        name = request.data.get('name')
-        website = request.data.get('website')
-        employee_count_index = request.data.get('employee_count_index')
-        country_id = request.data.get('country_id')
-        industry_id = request.data.get('industry_id')
-        manage = request.data.get('manage')
-        total_expenses = request.data.get('total_expenses')
-        active_employees = request.data.get('active_employees')
+        name = request.POST.get('name')
+        website = request.POST.get('website')
+        employee_count_index = int(request.POST.get('employee_count_index'))
+        country_id = int(request.POST.get('country_id'))
+        industry_id = int(request.POST.get('industry_id'))
+        manage = request.POST.get('manage')
+        total_expenses = request.POST.get('total_expenses')
+        active_employees = request.POST.get('active_employees')
 
         company.name = name
         company.website = website
@@ -143,15 +143,15 @@ def specialUsers(request, pk):
                         status=status.HTTP_200_OK)
 
     if request.method == 'PUT':
-        openUserId = request.data.get('open')
-        processingUserId = request.data.get('processing')
-        approveUserId = request.data.get('approve')
-        reimburseUserId = request.data.get('reimburse')
+        openUserId = int(request.POST.get('open'))
+        processingUserId = int(request.POST.get('processing'))
+        approveUserId = int(request.POST.get('approve'))
+        reimburseUserId = int(request.POST.get('reimburse'))
 
         company.open_user_id = openUserId
-        company.processing_id = processingUserId
-        company.approve_id = approveUserId
-        company.reimburse_id = reimburseUserId
+        company.processing_user_id = processingUserId
+        company.approve_user_id = approveUserId
+        company.reimburse_user_id = reimburseUserId
         
         try:
             company.save()
@@ -164,12 +164,12 @@ def specialUsers(request, pk):
         userIds = []
         if company.open_user_id != None:
             userIds.append(company.open_user_id)
-        if company.processing_id != None:
-            userIds.append(company.processing_id)
-        if company.approve_id != None:
-            userIds.append(company.approve_id)
-        if company.reimburse_id != None:
-            userIds.append(company.reimburse_id)        
+        if company.processing_user_id != None:
+            userIds.append(company.processing_user_id)
+        if company.approve_user_id != None:
+            userIds.append(company.approve_user_id)
+        if company.reimburse_user_id != None:
+            userIds.append(company.reimburse_user_id)        
 
         users = Users.objects.filter(Q(id__in=userIds), Q(company_id=companyId))
         userData = getUserData(users)
@@ -178,11 +178,11 @@ def specialUsers(request, pk):
         for user in userData:
             if user["id"] == company.open_user_id:
                 data["open"] = user
-            if user["id"] == company.processing_id:
+            if user["id"] == company.processing_user_id:
                 data["processing"] = user
-            if user["id"] == company.approve_id:
+            if user["id"] == company.approve_user_id:
                 data["approve"] = user
-            if user["id"] == company.reimburse_id:
+            if user["id"] == company.reimburse_user_id:
                 data["reimburse"] = user
         
         return Response(data={'success': True, 'data': data}, status=status.HTTP_200_OK)
@@ -213,11 +213,11 @@ def specialUser(request, pk, privilege):
     if privilege == 'open':
         users = Users.objects.filter(Q(id=company.open_user_id), Q(company_id=companyId))
     elif privilege == 'processing':
-        users = Users.objects.filter(Q(id=company.processing_id), Q(company_id=companyId))
+        users = Users.objects.filter(Q(id=company.processing_user_id), Q(company_id=companyId))
     elif privilege == 'approve':
-        users = Users.objects.filter(Q(id=company.approve_id), Q(company_id=companyId))
+        users = Users.objects.filter(Q(id=company.approve_user_id), Q(company_id=companyId))
     elif privilege == 'reimburse':
-        users = Users.objects.filter(Q(id=company.reimburse_id), Q(company_id=companyId))
+        users = Users.objects.filter(Q(id=company.reimburse_user_id), Q(company_id=companyId))
 
     userData = getUserData(users)
     
