@@ -152,13 +152,15 @@ def expenseUpdate(request, pk):
         expense.status = statusNum
         expense.payments_currency = user.payments_currency
 
+        print()
+
         if statusNum == 0:
             None
         elif statusNum == 1:
-            expense.open_user_id = company.open_user_id,
-            expense.processing_user_id = company.processing_user_id,
-            expense.approve_user_id = company.approve_user_id,
-            expense.reimburse_user_id = company.reimburse_user_id,
+            expense.open_user_id = company.open_user_id
+            expense.processing_user_id = company.processing_user_id
+            expense.approve_user_id = company.approve_user_id
+            expense.reimburse_user_id = company.reimburse_user_id
         else:
             return Response(data={'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK) 
 
