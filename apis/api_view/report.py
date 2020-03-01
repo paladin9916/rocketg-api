@@ -22,7 +22,7 @@ def reportSave(request):
         lang = 'en'
 
     comment = request.POST.get('comment')
-    int(user_id = request.POST.get('user_id'))
+    user_id = int(request.POST.get('user_id'))
     
     user = Users.objects.get(pk=user_id)
 
