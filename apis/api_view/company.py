@@ -143,15 +143,27 @@ def specialUsers(request, pk):
                         status=status.HTTP_200_OK)
 
     if request.method == 'PUT':
-        openUserId = int(request.POST.get('open'))
-        processingUserId = int(request.POST.get('processing'))
-        approveUserId = int(request.POST.get('approve'))
-        reimburseUserId = int(request.POST.get('reimburse'))
+        openUserId = request.POST.get('open')
+        processingUserId = request.POST.get('processing')
+        approveUserId = request.POST.get('approve')
+        reimburseUserId = request.POST.get('reimburse')
 
-        company.open_user_id = openUserId
-        company.processing_user_id = processingUserId
-        company.approve_user_id = approveUserId
-        company.reimburse_user_id = reimburseUserId
+        if openUserId == None:
+            company.open_user_id = None
+        else:
+            company.open_user_id = openUserId
+        if processingUserId == None:
+            company.processing_user_id = None
+        else:
+            company.processing_user_id = processingUserId
+        if approveUserId == None:
+            company.approve_user_id = None
+        else:
+            company.approve_user_id = approveUserId
+        if reimburseUserId == None:
+            company.reimburse_user_id = None
+        else:
+            company.reimburse_user_id = reimburseUserId        
         
         try:
             company.save()
