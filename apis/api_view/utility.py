@@ -3,14 +3,14 @@ import datetime
 import requests
 
 from django.db.models import Q, Sum, Count
-from datetime import datetime, timedelta
+from datetime import datetime as gdatetime, timedelta
 
 from apis.api_view import constants
 from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users, Dsessions
 from apis.serializers import ImageSerializer
 
 def isLoginUser(request):
-    now = datetime.now()
+    now = gdatetime.now()
     session_timeout = now - timedelta(hours=1)
     Dsessions.objects.filter(updated_at__lt=session_timeout).delete()
 

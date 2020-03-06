@@ -2,7 +2,7 @@ import binascii
 import os
 import calendar;
 import time;
-from datetime import datetime
+from datetime import datetime as gdatetime
 
 from django.contrib.auth.hashers import make_password
 from django.utils.crypto import get_random_string
@@ -44,7 +44,7 @@ def signIn(request):
                             status=status.HTTP_200_OK)
 
         # Auth Token
-        now = datetime.now()        
+        now = gdatetime.now()        
         client = binascii.hexlify(os.urandom(20)).decode()
         token_key = binascii.hexlify(os.urandom(10)).decode()
         ts = calendar.timegm(time.gmtime())
