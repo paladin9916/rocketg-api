@@ -3,10 +3,25 @@ import datetime
 import requests
 
 from django.db.models import Q, Sum, Count
+from datetime import datetime as gdatetime, timedelta
 
 from apis.api_view import constants
-from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users
+from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users, Dsessions
 from apis.serializers import ImageSerializer
+
+def isLoginUser(request):
+    now = gdatetime.now()
+    session_timeout = now - timedelta(hours=1)
+    Dsessions.objects.filter(updated_at__lt=session_timeout).delete()
+
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    dsession = Dsessions.objects.filter(Q(session_id=token))
+    if dsession and len(dsession) == 1 and dsession[0].client == client and dsession[0].uid == uid:
+        return True
+    else:
+        return False    
 
 def getExpenseData(expenses, wants_currency):
     expensesList = []
