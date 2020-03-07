@@ -1,5 +1,13 @@
 from django.db import models
 
+class Dsessions(models.Model):
+    session_id = models.CharField(max_length=50, null=False, blank=True)
+    uid = models.CharField(max_length=50, null=False, blank=True)
+    client = models.CharField(max_length=50, null=False, blank=True)
+    data = models.CharField(max_length=200, null=False, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
 
 class Countries(models.Model):
     code = models.CharField(max_length=10, null=True, blank=True)
