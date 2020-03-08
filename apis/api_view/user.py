@@ -94,7 +94,7 @@ def userGetSave(request):
 
                 user = Users(uid=email, email=email, firstname=firstname, lastname=lastname,
                              encrypted_password=encryptedPassword, reset_password_token=password, phone=phone,
-                             job_title=jobTitle,
+                             job_title=jobTitle, avatar=avatar,
                              department=department, language=language, role_id=roleId, company_id=companyId,
                              reimbursement_cycle=reimbursementCycle, payments_currency=paymentsCurrency)
 
@@ -106,14 +106,6 @@ def userGetSave(request):
                 except Users.DoesNotExist:
                     return Response(data={'success': False, 'error': [translation.gettext('Error in creating User.')]},
                                     status=status.HTTP_200_OK)
-
-                # upload avatar
-                imageSerData = {
-                    "user_id": user.id,
-                    "avatar": avatar
-                }
-                imageSerializer = uploadImage(user.id, imageSerData)
-                user.avatar = imageSerializer.data.get('avatar')
                 user.save()
 
                 userData = getUserDataWithPW([user, ])
@@ -180,14 +172,7 @@ def userDetailUpdate(request, pk):
                 user.company_id = companyId
                 user.reimbursement_cycle = reimbursementCycle
                 user.payments_currency = paymentsCurrency
-
-                # upload avatar
-                imageSerData = {
-                    "user_id": pk,
-                    "avatar": avatar
-                }
-                imageSerializer = uploadImage(pk, imageSerData)
-                user.avatar = imageSerializer.data.get('avatar')
+                user.avatar = avatar
 
                 try:
                     user.save()
