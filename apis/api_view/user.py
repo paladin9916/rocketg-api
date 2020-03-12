@@ -2,6 +2,7 @@ from django.contrib.auth.hashers import make_password
 from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
 from django.db.models import Q
 from django.utils.crypto import get_random_string
+from django.core.files.storage import FileSystemStorage
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -160,6 +161,14 @@ def userDetailUpdate(request, pk):
                     return Response(data={'success': False, 'error': [translation.gettext('Exist this phone number. Please try again.')]},
                                     status=status.HTTP_200_OK)
             except Users.DoesNotExist:
+                if (user.avatar != None and avatar == None) or (user.avatar != None and user.avatar.strip() != avatar.strip()):
+                    filePath = str(user.avatar)
+                    filePath = filePath.replace("/media/", "")
+
+                    if len(filePath) > 0:
+                        fs = FileSystemStorage()
+                        fs.delete(filePath)
+
                 user.uid = email
                 user.email = email
                 user.firstname = firstname

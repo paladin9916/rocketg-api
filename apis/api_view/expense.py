@@ -137,6 +137,14 @@ def expenseUpdate(request, pk):
         user = Users.objects.get(pk=user_id)
         company = Companies.objects.get(pk=company_id)
 
+        if (expense.file_urls != None and file_urls == None) or  (expense.file_urls != None and file_urls.strip() != expense.file_urls.strip()):
+            filePath = str(expense.file_urls)
+            filePath = filePath.replace("/media/", "")
+
+            if len(filePath) > 0:
+                fs = FileSystemStorage()
+                fs.delete(filePath)
+
         expense.merchant_name = merchant_name
         expense.receipt_date = receipt_date
         expense.description = description
@@ -151,8 +159,6 @@ def expenseUpdate(request, pk):
         expense.company_id = company_id
         expense.status = statusNum
         expense.payments_currency = user.payments_currency
-
-        print()
 
         if statusNum == 0:
             None
