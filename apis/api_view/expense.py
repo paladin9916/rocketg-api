@@ -218,9 +218,6 @@ def expenseChangeSatusInReport(request, report):
     expense_to_status = request.query_params.get('to_status')
     order_by = request.query_params.get('order_by')
 
-    if wants_currency == None:
-        wants_currency = 3
-
     expenseData = []
     oExpense = Expenses.objects.filter(Q(report_id=report))
     if expense_status != None:
