@@ -199,6 +199,45 @@ def expenseUpdate(request, pk):
 
         return Response(data={'success': True}, status=status.HTTP_200_OK)
 
+@api_view(['POST'])
+def expenseChangeSatusInReport(request, report):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+    if lang is not None:
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
+
+    assigneeId = request.query_params.get('assignee_id')
+    expense_status = request.query_params.get('from_status')
+    expense_to_status = request.query_params.get('to_status')
+    order_by = request.query_params.get('order_by')
+
+    if wants_currency == None:
+        wants_currency = 3
+
+    expenseData = []
+    oExpense = Expenses.objects.filter(Q(report_id=report))
+    if expense_status != None:
+        oExpense = oExpense.filter(Q(status=expense_status))
+
+    if assigneeId != None:
+        assignee = assigneeId
+        oExpense = oExpense.filter(Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ",")
+        | Q(open_user_id=assignee) | Q(processing_user_id=assignee) | Q(approve_user_id=assignee) | Q(reimburse_user_id=assignee))
+
+    if order_by != None:
+        oExpense = oExpense.order_by(order_by)
+
+    expenses = oExpense.all()
+    expenses.update(status=expense_to_status)
+    return Response(data={'success': True}, status=status.HTTP_200_OK)
+
 
 @api_view(['POST'])
 def expenseChangeStatus(request):

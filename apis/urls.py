@@ -31,5 +31,6 @@ urlpatterns = [
 
     path('user/reports', report.reports),
     path('user/reports/<int:pk>', report.deleteReport),
+    path('user/reports/<int:report>/change_status', expense.expenseChangeSatusInReport),
     path('user/reports/<int:report>/expenses', expense.expensesInReport),
 ]
