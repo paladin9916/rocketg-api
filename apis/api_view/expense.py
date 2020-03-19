@@ -213,10 +213,10 @@ def expenseChangeSatusInReport(request, report):
     elif lang is None or lang == '':
         lang = 'en'
 
-    assigneeId = request.query_params.get('assignee_id')
-    expense_status = request.query_params.get('from_status')
-    expense_to_status = request.query_params.get('to_status')
-    order_by = request.query_params.get('order_by')
+    assigneeId = request.POST.get('assignee_id')
+    expense_status = request.POST.get('from_status')
+    expense_to_status = request.POST.get('to_status')
+    order_by = request.POST.get('order_by')
 
     expenseData = []
     oExpense = Expenses.objects.filter(Q(report_id=report))
