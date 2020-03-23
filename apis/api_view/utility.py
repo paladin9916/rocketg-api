@@ -255,6 +255,7 @@ def getUserData(users):
             "role_id": user.role_id,
             "avatar_url": user.avatar,
             "company_id": user.company_id,
+            "reporter_id": user.reporter_id,
             "reimbursement_cycle": user.reimbursement_cycle,
             "payments_currency": user.payments_currency
         }
@@ -280,6 +281,7 @@ def getUserDataWithPW(users):
             "role_id": user.role_id,
             "avatar_url": user.avatar,
             "company_id": user.company_id,
+            "reporter_id": user.reporter_id,
             "reimbursement_cycle": user.reimbursement_cycle,
             "payments_currency": user.payments_currency
         }
