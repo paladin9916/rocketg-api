@@ -75,6 +75,7 @@ def userGetSave(request):
         language = request.POST.get('language')
         roleId = int(request.POST.get('role_id'))
         companyId = int(request.POST.get('company_id'))
+        reporterId = int(request.POST.get('reporter_id'))
         avatar = request.POST.get('avatar')
         reimbursementCycle = int(request.POST.get('reimbursement_cycle'))
         paymentsCurrency = int(request.POST.get('payments_currency'))
@@ -95,7 +96,7 @@ def userGetSave(request):
 
                 user = Users(uid=email, email=email, firstname=firstname, lastname=lastname,
                              encrypted_password=encryptedPassword, reset_password_token=password, phone=phone,
-                             job_title=jobTitle, avatar=avatar,
+                             job_title=jobTitle, avatar=avatar, reporter_id=reporterId,
                              department=department, language=language, role_id=roleId, company_id=companyId,
                              reimbursement_cycle=reimbursementCycle, payments_currency=paymentsCurrency)
 
@@ -147,6 +148,7 @@ def userDetailUpdate(request, pk):
         language = request.POST.get('language')
         roleId = int(request.POST.get('role_id'))
         companyId = int(request.POST.get('company_id'))
+        reporterId = int(request.POST.get('reporter_id'))
         avatar = request.POST.get('avatar')
         reimbursementCycle = int(request.POST.get('reimbursement_cycle'))
         paymentsCurrency = int(request.POST.get('payments_currency'))
@@ -179,6 +181,7 @@ def userDetailUpdate(request, pk):
                 user.language = language
                 user.role_id = roleId
                 user.company_id = companyId
+                user.reporter_id = reporterId
                 user.reimbursement_cycle = reimbursementCycle
                 user.payments_currency = paymentsCurrency
                 user.avatar = avatar
