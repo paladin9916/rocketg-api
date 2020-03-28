@@ -2,6 +2,7 @@ from django.contrib.auth.hashers import make_password
 from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
 from django.db.models import Q
 from django.utils.crypto import get_random_string
+from django.core.files.storage import FileSystemStorage
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -74,6 +75,7 @@ def userGetSave(request):
         language = request.POST.get('language')
         roleId = int(request.POST.get('role_id'))
         companyId = int(request.POST.get('company_id'))
+        reporterId = int(request.POST.get('reporter_id'))
         avatar = request.POST.get('avatar')
         reimbursementCycle = int(request.POST.get('reimbursement_cycle'))
         paymentsCurrency = int(request.POST.get('payments_currency'))
@@ -94,7 +96,7 @@ def userGetSave(request):
 
                 user = Users(uid=email, email=email, firstname=firstname, lastname=lastname,
                              encrypted_password=encryptedPassword, reset_password_token=password, phone=phone,
-                             job_title=jobTitle, avatar=avatar,
+                             job_title=jobTitle, avatar=avatar, reporter_id=reporterId,
                              department=department, language=language, role_id=roleId, company_id=companyId,
                              reimbursement_cycle=reimbursementCycle, payments_currency=paymentsCurrency)
 
@@ -146,6 +148,7 @@ def userDetailUpdate(request, pk):
         language = request.POST.get('language')
         roleId = int(request.POST.get('role_id'))
         companyId = int(request.POST.get('company_id'))
+        reporterId = int(request.POST.get('reporter_id'))
         avatar = request.POST.get('avatar')
         reimbursementCycle = int(request.POST.get('reimbursement_cycle'))
         paymentsCurrency = int(request.POST.get('payments_currency'))
@@ -160,6 +163,14 @@ def userDetailUpdate(request, pk):
                     return Response(data={'success': False, 'error': [translation.gettext('Exist this phone number. Please try again.')]},
                                     status=status.HTTP_200_OK)
             except Users.DoesNotExist:
+                if (user.avatar != None and avatar == None) or (user.avatar != None and user.avatar.strip() != avatar.strip()):
+                    filePath = str(user.avatar)
+                    filePath = filePath.replace("/media/", "")
+
+                    if len(filePath) > 0:
+                        fs = FileSystemStorage()
+                        fs.delete(filePath)
+
                 user.uid = email
                 user.email = email
                 user.firstname = firstname
@@ -170,6 +181,7 @@ def userDetailUpdate(request, pk):
                 user.language = language
                 user.role_id = roleId
                 user.company_id = companyId
+                user.reporter_id = reporterId
                 user.reimbursement_cycle = reimbursementCycle
                 user.payments_currency = paymentsCurrency
                 user.avatar = avatar
