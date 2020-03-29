@@ -34,6 +34,7 @@ class Companies(models.Model):
     processing_user = models.ForeignKey('Users', on_delete=models.SET_NULL, blank=True, null=True, related_name='company_processing_user')
     approve_user = models.ForeignKey('Users', on_delete=models.SET_NULL, blank=True, null=True, related_name='company_approve_user')
     reimburse_user = models.ForeignKey('Users', on_delete=models.SET_NULL, blank=True, null=True, related_name='company_reimburse_user')
+    step_users = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
