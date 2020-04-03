@@ -148,23 +148,42 @@ def specialUsers(request, pk):
         approveUserId = request.POST.get('approve')
         reimburseUserId = request.POST.get('reimburse')
 
+        company.step_users = 0b0000
         if openUserId == None:
             company.open_user_id = None
+        elif int(openUserId) == 0:
+            company.open_user_id = None
+            company.step_users = company.step_users | 0b1000
         else:
-            company.open_user_id = openUserId
+            company.open_user_id = int(openUserId)
+            company.step_users = company.step_users | 0b1000
+
         if processingUserId == None:
+            company.processing_user_id = None            
+        elif int(processingUserId) == 0:
             company.processing_user_id = None
+            company.step_users = company.step_users | 0b0100
         else:
-            company.processing_user_id = processingUserId
+            company.processing_user_id = int(processingUserId)
+
         if approveUserId == None:
             company.approve_user_id = None
+        elif int(approveUserId) == 0:
+            company.approve_user_id = None
+            company.step_users = company.step_users | 0b0010
         else:
-            company.approve_user_id = approveUserId
+            company.approve_user_id = int(approveUserId)
+            company.step_users = company.step_users | 0b0010
+
         if reimburseUserId == None:
             company.reimburse_user_id = None
+        elif int(reimburseUserId) == 0:
+            company.reimburse_user_id = None
+            company.step_users = company.step_users | 0b0001
         else:
-            company.reimburse_user_id = reimburseUserId        
-        
+            company.reimburse_user_id = int(reimburseUserId)
+            company.step_users = company.step_users | 0b0001
+
         try:
             company.save()
         except Companies.DoesNotExist:
@@ -196,6 +215,15 @@ def specialUsers(request, pk):
                 data["approve"] = user
             if user["id"] == company.reimburse_user_id:
                 data["reimburse"] = user
+
+        if company.open_user_id == None and company.step_users & 0b1000 > 0:
+            data["open"] = "direct_user"
+        if company.processing_user_id == None and company.step_users & 0b0100 > 0:
+            data["processing"] = "direct_user"
+        if company.approve_user_id == None and company.step_users & 0b0010 > 0:
+            data["approve"] = "direct_user"
+        if company.reimburse_user_id == None and company.step_users & 0b0001 > 0:
+            data["reimburse"] = "direct_user"
         
         return Response(data={'success': True, 'data': data}, status=status.HTTP_200_OK)
 
