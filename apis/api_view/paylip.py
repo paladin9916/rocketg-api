@@ -44,7 +44,7 @@ def paylips(request, user):
             u = Users.objects.get(id=user)
             u.paylips_count += 1
             u.save()
-        except paylip.DoesNotExist:
+        except Users.DoesNotExist:
             return Response(data={'success': False, 'error': [translation.gettext('Error in creating company.')]}, status=status.HTTP_200_OK)
 
         return Response(data={'success': True, 'data': 'success'}, status=status.HTTP_200_OK)
