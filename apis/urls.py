@@ -1,4 +1,4 @@
-from apis.api_view import auth, company, user, expense, industry, country, report
+from apis.api_view import auth, company, user, expense, industry, country, report, paylip
 from django.urls import path
 
 from apis.api_view.upload_image import ImageUploadView
@@ -22,6 +22,9 @@ urlpatterns = [
 
     path('admin/industries', industry.industryGet),
     path('admin/countries', country.countryGet),
+
+    path('admin/paylips/<int:user>', paylip.paylips),
+    path('admin/paylips/upload_file', AttachmentUploadView.as_view()),
 
     path('user/expenses', expense.expenseSave),
     path('user/expenses/count', expense.expenseCount),

@@ -9,6 +9,22 @@ from apis.api_view import constants
 from apis.models import Industry_locales, Country_locales, Images, Countries, Expenses, Users, Dsessions
 from apis.serializers import ImageSerializer
 
+def getPaylipData(paylips):
+    payList = []
+    for pay in paylips:
+        payData = {
+            "id": pay.id,
+            "name": pay.name,
+            "file_urls": pay.file_urls,
+            "user_id": pay.user,
+            "uploaded_at": pay.uploaded_at
+        }
+
+        payList.append(payData)
+    
+    return payList
+
+
 def isLoginUser(request):
     now = gdatetime.now()
     session_timeout = now - timedelta(hours=1)
@@ -256,6 +272,7 @@ def getUserData(users):
             "avatar_url": user.avatar,
             "company_id": user.company_id,
             "reporter_id": user.reporter_id,
+            "paylips_count": user.paylips_count,
             "reimbursement_cycle": user.reimbursement_cycle,
             "payments_currency": user.payments_currency
         }
@@ -282,6 +299,7 @@ def getUserDataWithPW(users):
             "avatar_url": user.avatar,
             "company_id": user.company_id,
             "reporter_id": user.reporter_id,
+            "paylips_count": user.paylips_count,
             "reimbursement_cycle": user.reimbursement_cycle,
             "payments_currency": user.payments_currency
         }
