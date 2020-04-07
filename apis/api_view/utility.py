@@ -16,7 +16,7 @@ def getPaylipData(paylips):
             "id": pay.id,
             "name": pay.name,
             "file_urls": pay.file_urls,
-            "user_id": pay.user,
+            "user_id": pay.user_id,
             "uploaded_at": pay.uploaded_at
         }
 

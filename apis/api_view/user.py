@@ -31,7 +31,6 @@ def userGetSave(request):
     if request.method == 'GET':
         page_str = request.query_params.get('page')
         perPage_str = request.query_params.get('per_page')
-        companyId = int(request.query_params.get('company_id'))
         searchKey = request.query_params.get('search_key')
 
         if page_str is None or page_str == '':
@@ -46,8 +45,13 @@ def userGetSave(request):
 
         userList = None
         try:
-            userList = Users.objects.filter(Q(company_id=companyId),
-                                            Q(email__contains=searchKey) | Q(firstname__contains=searchKey) | Q(
+            userList = Users.objects
+            if request.query_params.get('company_id') != None:
+                companyId = int(request.query_params.get('company_id'))
+                userList = userList.filter(Q(company_id=companyId))
+            
+            if searchKey != None:
+                userList = userList.filter(Q(email__contains=searchKey) | Q(firstname__contains=searchKey) | Q(
                                                 lastname__contains=searchKey)).order_by('id')
         except Users.DoesNotExist:
             return Response(data={'success': False, 'error': [translation.gettext('Error in getting user.')]}, status=status.HTTP_200_OK)
