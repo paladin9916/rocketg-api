@@ -277,7 +277,7 @@ def specialUsersForUser(request):
     elif lang is None or lang == '':
         lang = 'en'
     
-    me = Users.objects.get(pk=uid)
+    me = login_user = Users.objects.get(email=uid)
     directUser = me.reporter
 
     company = me.company
