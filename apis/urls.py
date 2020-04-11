@@ -36,4 +36,7 @@ urlpatterns = [
     path('user/reports/<int:pk>', report.deleteReport),
     path('user/reports/<int:report>/change_status', expense.expenseChangeSatusInReport),
     path('user/reports/<int:report>/expenses', expense.expensesInReport),
+
+    path('user/special_privilege', company.specialUsersForUser),
+    path('user/special_privilege/<slug:privilege>', company.specialUserForUser),
 ]
