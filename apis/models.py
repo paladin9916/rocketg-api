@@ -34,6 +34,7 @@ class Companies(models.Model):
     processing_user = models.ForeignKey('Users', on_delete=models.SET_NULL, blank=True, null=True, related_name='company_processing_user')
     approve_user = models.ForeignKey('Users', on_delete=models.SET_NULL, blank=True, null=True, related_name='company_approve_user')
     reimburse_user = models.ForeignKey('Users', on_delete=models.SET_NULL, blank=True, null=True, related_name='company_reimburse_user')
+    step_users = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -75,6 +76,7 @@ class Users(models.Model):
     job_title = models.CharField(max_length=50, null=True, blank=True)
     department = models.CharField(max_length=50, null=True, blank=True)
     avatar = models.CharField(max_length=255, null=True, blank=True)       # save avatar path
+    paylips_count = models.IntegerField(default=0)
     role_id = models.CharField(max_length=50, null=True, blank=True)
     language = models.CharField(max_length=50, null=True)
     reporter = models.ForeignKey('Users', on_delete=models.SET_NULL, blank=True, null=True, related_name='reporter_user')
@@ -82,6 +84,11 @@ class Users(models.Model):
     payments_currency = models.IntegerField(default=3, null=False)
     reimbursement_cycle = models.IntegerField(default=0, null=False)
 
+class Paylips(models.Model):
+    name = models.CharField(max_length=50, null=True, blank=True)
+    file_urls = models.TextField(null=True, blank=True)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, null=False)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
 
 class Images(models.Model):
     user_id = models.IntegerField(default=0)

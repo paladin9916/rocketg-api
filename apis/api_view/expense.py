@@ -62,6 +62,20 @@ def expenseSave(request):
                 payments_currency=user.payments_currency
             )
         elif statusNum == 1:
+            open_user_id = company.open_user_id
+            processing_user_id = company.processing_user_id
+            approve_user_id = company.approve_user_id
+            reimburse_user_id = company.reimburse_user_id
+
+            if open_user_id == None and company.step_users & 0b1000 > 0:
+                open_user_id = user.reporter_id
+            if processing_user_id == None and company.step_users & 0b0100 > 0:
+                processing_user_id = user.reporter_id
+            if approve_user_id == None and company.step_users & 0b0010 > 0:
+                approve_user_id = user.reporter_id
+            if reimburse_user_id == None and company.step_users & 0b0001 > 0:
+                reimburse_user_id = user.reporter_id
+
             expense = Expenses(
                 merchant_name=merchant_name,
                 receipt_date=receipt_date,
@@ -73,10 +87,10 @@ def expenseSave(request):
                 file_urls=file_urls,
                 file_names=file_names,
                 user_id=user_id,
-                open_user_id = company.open_user_id,
-                processing_user_id = company.processing_user_id,
-                approve_user_id = company.approve_user_id,
-                reimburse_user_id = company.reimburse_user_id,
+                open_user_id = open_user_id,
+                processing_user_id = processing_user_id,
+                approve_user_id = approve_user_id,
+                reimburse_user_id = reimburse_user_id,
                 report_id=report_id,
                 company_id=company_id,
                 status=statusNum,
@@ -163,10 +177,24 @@ def expenseUpdate(request, pk):
         if statusNum == 0:
             None
         elif statusNum == 1:
-            expense.open_user_id = company.open_user_id
-            expense.processing_user_id = company.processing_user_id
-            expense.approve_user_id = company.approve_user_id
-            expense.reimburse_user_id = company.reimburse_user_id
+            open_user_id = company.open_user_id
+            processing_user_id = company.processing_user_id
+            approve_user_id = company.approve_user_id
+            reimburse_user_id = company.reimburse_user_id
+
+            if open_user_id == None and company.step_users & 0b1000 > 0:
+                open_user_id = user.reporter_id
+            if processing_user_id == None and company.step_users & 0b0100 > 0:
+                processing_user_id = user.reporter_id
+            if approve_user_id == None and company.step_users & 0b0010 > 0:
+                approve_user_id = user.reporter_id
+            if reimburse_user_id == None and company.step_users & 0b0001 > 0:
+                reimburse_user_id = user.reporter_id
+
+            expense.open_user_id = open_user_id
+            expense.processing_user_id = processing_user_id
+            expense.approve_user_id = approve_user_id
+            expense.reimburse_user_id = reimburse_user_id
         else:
             return Response(data={'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK) 
 

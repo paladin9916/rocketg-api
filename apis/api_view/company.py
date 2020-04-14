@@ -148,23 +148,42 @@ def specialUsers(request, pk):
         approveUserId = request.POST.get('approve')
         reimburseUserId = request.POST.get('reimburse')
 
+        company.step_users = 0b0000
         if openUserId == None:
             company.open_user_id = None
+        elif int(openUserId) == 0:
+            company.open_user_id = None
+            company.step_users = company.step_users | 0b1000
         else:
-            company.open_user_id = openUserId
+            company.open_user_id = int(openUserId)
+            company.step_users = company.step_users | 0b1000
+
         if processingUserId == None:
+            company.processing_user_id = None            
+        elif int(processingUserId) == 0:
             company.processing_user_id = None
+            company.step_users = company.step_users | 0b0100
         else:
-            company.processing_user_id = processingUserId
+            company.processing_user_id = int(processingUserId)
+
         if approveUserId == None:
             company.approve_user_id = None
+        elif int(approveUserId) == 0:
+            company.approve_user_id = None
+            company.step_users = company.step_users | 0b0010
         else:
-            company.approve_user_id = approveUserId
+            company.approve_user_id = int(approveUserId)
+            company.step_users = company.step_users | 0b0010
+
         if reimburseUserId == None:
             company.reimburse_user_id = None
+        elif int(reimburseUserId) == 0:
+            company.reimburse_user_id = None
+            company.step_users = company.step_users | 0b0001
         else:
-            company.reimburse_user_id = reimburseUserId        
-        
+            company.reimburse_user_id = int(reimburseUserId)
+            company.step_users = company.step_users | 0b0001
+
         try:
             company.save()
         except Companies.DoesNotExist:
@@ -196,11 +215,126 @@ def specialUsers(request, pk):
                 data["approve"] = user
             if user["id"] == company.reimburse_user_id:
                 data["reimburse"] = user
+
+        if company.open_user_id == None and company.step_users & 0b1000 > 0:
+            data["open"] = "direct_user"
+        if company.processing_user_id == None and company.step_users & 0b0100 > 0:
+            data["processing"] = "direct_user"
+        if company.approve_user_id == None and company.step_users & 0b0010 > 0:
+            data["approve"] = "direct_user"
+        if company.reimburse_user_id == None and company.step_users & 0b0001 > 0:
+            data["reimburse"] = "direct_user"
         
         return Response(data={'success': True, 'data': data}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def specialUser(request, pk, privilege):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+    if lang is not None:
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
+
+    companyId = pk
+    company = None
+    try:
+        company = Companies.objects.get(pk=pk)
+    except Companies.DoesNotExist:
+        return Response(data={'success': False, 'error': [translation.gettext('Company do not exist.')]},
+                        status=status.HTTP_200_OK)
+
+    users = None
+    if privilege == 'open':
+        users = Users.objects.filter(Q(id=company.open_user_id), Q(company_id=companyId))
+    elif privilege == 'processing':
+        users = Users.objects.filter(Q(id=company.processing_user_id), Q(company_id=companyId))
+    elif privilege == 'approve':
+        users = Users.objects.filter(Q(id=company.approve_user_id), Q(company_id=companyId))
+    elif privilege == 'reimburse':
+        users = Users.objects.filter(Q(id=company.reimburse_user_id), Q(company_id=companyId))
+
+    userData = getUserData(users)
+    
+    return Response(data={'success': True, 'data': userData}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def specialUsersForUser(request):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+    if lang is not None:
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
+    
+    me = login_user = Users.objects.get(email=uid)
+    directUser = me.reporter
+
+    company = me.company
+
+    if request.method == 'GET':
+        userIds = []
+        if company.open_user_id != None:
+            userIds.append(company.open_user_id)
+        if company.processing_user_id != None:
+            userIds.append(company.processing_user_id)
+        if company.approve_user_id != None:
+            userIds.append(company.approve_user_id)
+        if company.reimburse_user_id != None:
+            userIds.append(company.reimburse_user_id)        
+
+        users = Users.objects.filter(Q(id__in=userIds), Q(company_id=company.id))
+        userData = getUserData(users)
+        directUserData = None
+        if directUser != None:
+            directUserData = getUserData([directUser])
+
+        data = {}
+        for user in userData:
+            if user["id"] == company.open_user_id:
+                data["open"] = user
+            if user["id"] == company.processing_user_id:
+                data["processing"] = user
+            if user["id"] == company.approve_user_id:
+                data["approve"] = user
+            if user["id"] == company.reimburse_user_id:
+                data["reimburse"] = user
+
+        if company.open_user_id == None and company.step_users & 0b1000 > 0:
+            if directUserData != None:
+                data["open"] = directUserData[0]
+            else:                
+                data["open"] = "direct_user"
+        if company.processing_user_id == None and company.step_users & 0b0100 > 0:
+            if directUserData != None:
+                data["processing"] = directUserData[0]
+            else:                
+                data["processing"] = "direct_user"
+        if company.approve_user_id == None and company.step_users & 0b0010 > 0:
+            if directUserData != None:
+                data["approve"] = directUserData[0]
+            else:                
+                data["approve"] = "direct_user"
+        if company.reimburse_user_id == None and company.step_users & 0b0001 > 0:
+            if directUserData != None:
+                data["reimburse"] = directUserData[0]
+            else:                
+                data["reimburse"] = "direct_user"
+        
+        return Response(data={'success': True, 'data': data}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def specialUserForUser(request, privilege):
     token = request.headers.get('access-token')
     client = request.headers.get('client')
     uid = request.headers.get('uid')
