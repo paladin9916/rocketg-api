@@ -78,18 +78,18 @@ def signOut(request):
         elif lang is None or lang == '':
             lang = 'en'
         
-        # isLogin = isLoginUser(request)
-        # if isLogin == False:
-        #     return Response(data={'success': False, 'error': [translation.gettext('Error in signing out')]},
-        #                     status=status.HTTP_200_OK)
+        isLogin = isLoginUser(request)
+        if isLogin == False:
+            return Response(data={'success': False, 'error': [translation.gettext('Session time out')]},
+                            status=status.HTTP_200_OK)
 
         dsession = Dsessions.objects.filter(Q(session_id=token))
         try:
             dsession.delete()
         except KeyError:
-            return Response(data={'success': True}, status=status.HTTP_200_OK)
-            # return Response(data={'success': False, 'error': [translation.gettext('Error in signing out')]},
-            #                 status=status.HTTP_200_OK)
+            # return Response(data={'success': True}, status=status.HTTP_200_OK)
+            return Response(data={'success': False, 'error': [translation.gettext('Error in signing out')]},
+                            status=status.HTTP_200_OK)
 
         return Response(data={'success': True}, status=status.HTTP_200_OK)
 

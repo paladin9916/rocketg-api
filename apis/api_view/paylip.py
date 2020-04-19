@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from apis.api_view.utility import getPaylipData
+from apis.api_view.utility import getPaylipData, isLoginUser
 from apis.models import Users, Paylips
 
 from django.utils import translation

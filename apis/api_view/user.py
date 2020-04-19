@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from RocketG_api import settings
-from apis.api_view.utility import getUserData, uploadImage, getUserDataWithPW
+from apis.api_view.utility import getUserData, uploadImage, getUserDataWithPW, isLoginUser
 from apis.models import Users, Companies
 
 from django.utils import translation

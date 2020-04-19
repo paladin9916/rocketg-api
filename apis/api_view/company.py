@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from apis.api_view.utility import getCompanyData, getUserData
+from apis.api_view.utility import getCompanyData, getUserData, isLoginUser
 from apis.models import Companies, Users
 
 from django.utils import translation

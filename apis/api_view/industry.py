@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from apis.api_view.utility import getIndustryData
+from apis.api_view.utility import getIndustryData, isLoginUser
 from apis.models import Industry_locales
 
 from django.utils import translation
