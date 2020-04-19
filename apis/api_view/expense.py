@@ -25,6 +25,11 @@ def expenseSave(request):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
+
     if request.method == 'POST':
         merchant_name = request.POST.get('merchant_name')
         receipt_date = request.POST.get('receipt_date')
@@ -121,6 +126,11 @@ def expenseUpdate(request, pk):
             translation.activate(lang)
     elif lang is None or lang == '':
         lang = 'en'
+
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
 
     expense = None
     try:
@@ -241,6 +251,11 @@ def expenseChangeSatusInReport(request, report):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
+
     assigneeId = request.POST.get('assignee_id')
     expense_status = request.POST.get('from_status')
     expense_to_status = request.POST.get('to_status')
@@ -278,6 +293,11 @@ def expenseChangeStatus(request):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
+
     if request.method == 'POST':
         id = int(request.POST.get('id'))
         statusNum = int(request.POST.get('status'))
@@ -311,6 +331,11 @@ def expenseCount(request):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
+
     assigneeId = request.query_params.get('assignee_id')
     user_id = request.query_params.get('user_id')
     expense_status = request.query_params.get('status')
@@ -331,6 +356,11 @@ def expensesInReport(request, report):
             translation.activate(lang)
     elif lang is None or lang == '':
         lang = 'en'
+
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
 
     assigneeId = request.query_params.get('assignee_id')
     wants_currency = request.query_params.get('wants_currency')

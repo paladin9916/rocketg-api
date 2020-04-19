@@ -25,6 +25,11 @@ def componyGetSave(request):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
+
     if request.method == 'GET':
         page_str = request.query_params.get('page')
         perPage_str = request.query_params.get('per_page')
@@ -88,6 +93,11 @@ def componyUpdate(request, pk):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
+
     if request.method == 'PUT':
         try:
             company = Companies.objects.get(pk=pk)
@@ -133,6 +143,11 @@ def specialUsers(request, pk):
             translation.activate(lang)
     elif lang is None or lang == '':
         lang = 'en'
+
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
 
     companyId = pk
     company = None
@@ -241,6 +256,11 @@ def specialUser(request, pk, privilege):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
+
     companyId = pk
     company = None
     try:
@@ -276,6 +296,11 @@ def specialUsersForUser(request):
             translation.activate(lang)
     elif lang is None or lang == '':
         lang = 'en'
+
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
     
     me = login_user = Users.objects.get(email=uid)
     directUser = me.reporter
@@ -346,6 +371,11 @@ def specialUserForUser(request, privilege):
             translation.activate(lang)
     elif lang is None or lang == '':
         lang = 'en'
+
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
 
     companyId = pk
     company = None

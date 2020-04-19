@@ -98,6 +98,11 @@ def reportList(request):
 
 @api_view(['POST', 'GET'])
 def reports(request):
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
+
     if request.method == 'POST':
         return reportSave(request)
     elif request.method == 'GET':
@@ -116,6 +121,11 @@ def deleteReport(request, pk):
             translation.activate(lang)
     elif lang is None or lang == '':
         lang = 'en'
+
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
 
     try:
         report = Reports.objects.get(pk=pk)

@@ -28,6 +28,11 @@ def userGetSave(request):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
+
     if request.method == 'GET':
         page_str = request.query_params.get('page')
         perPage_str = request.query_params.get('per_page')
@@ -135,6 +140,11 @@ def userDetailUpdate(request, pk):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
+
     try:
         user = Users.objects.get(pk=pk)
     except Users.DoesNotExist:
@@ -218,6 +228,11 @@ def resetPassword(request):
                 translation.activate(lang)
         elif lang is None or lang == '':
             lang = 'en'
+
+        isLogin = isLoginUser(request)
+        if isLogin == False:
+            return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                            status=status.HTTP_200_OK)
 
         password = get_random_string(length=16)
         salt = settings.SECRET_KEY

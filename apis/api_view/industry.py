@@ -23,6 +23,11 @@ def industryGet(request):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+                        status=status.HTTP_200_OK)
+
     if request.method == 'GET':
         industryList = None
         try:
