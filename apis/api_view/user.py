@@ -79,10 +79,13 @@ def userGetSave(request):
         language = request.POST.get('language')
         roleId = int(request.POST.get('role_id'))
         companyId = int(request.POST.get('company_id'))
-        reporterId = int(request.POST.get('reporter_id'))
+        reporterId = request.POST.get('reporter_id')
         avatar = request.POST.get('avatar')
         reimbursementCycle = int(request.POST.get('reimbursement_cycle'))
         paymentsCurrency = int(request.POST.get('payments_currency'))
+
+        if reporterId != None:
+            reporterId = int(reporterId)
 
         try:
             if Users.objects.get(email=email):
@@ -152,10 +155,13 @@ def userDetailUpdate(request, pk):
         language = request.POST.get('language')
         roleId = int(request.POST.get('role_id'))
         companyId = int(request.POST.get('company_id'))
-        reporterId = int(request.POST.get('reporter_id'))
+        reporterId = request.POST.get('reporter_id')
         avatar = request.POST.get('avatar')
         reimbursementCycle = int(request.POST.get('reimbursement_cycle'))
         paymentsCurrency = int(request.POST.get('payments_currency'))
+
+        if reporterId != None:
+            reporterId = int(reporterId)
 
         try:
             if Users.objects.get(~Q(id=pk), Q(email=email)):

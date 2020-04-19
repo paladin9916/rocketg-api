@@ -25,11 +25,34 @@ def myPaylips(request):
         lang = 'en'
     
     if request.method == 'GET':
+        page_str = request.query_params.get('page')
+        perPage_str = request.query_params.get('per_page')
+        if page_str is None or page_str == '':
+            page = 0
+        else:
+            page = int(page_str)
+
+        if perPage_str is None or perPage_str == '':
+            perPage = 10
+        else:
+            perPage = int(perPage_str)
+            
         me = login_user = Users.objects.get(email=uid)
         pays = Paylips.objects.filter(Q(user_id=me.id)).order_by('name')
+
+        total_count = pays.count()
+        paginator = Paginator(pays, perPage)  # Show users per page
+
+        try:
+            pays = paginator.get_page(page + 1)
+        except PageNotAnInteger:
+            pays = paginator.page(1)
+        except EmptyPage:
+            pays = paginator.page(paginator.num_pages)
+
         data = getPaylipData(pays)
 
-        return Response(data={'success': True, 'data': data}, status=status.HTTP_200_OK)
+        return Response(data={'success': True, 'data': data, 'totalRowCount': total_count}, status=status.HTTP_200_OK)
 
 @api_view(['POST', 'GET'])
 def paylips(request, user):
@@ -46,10 +69,33 @@ def paylips(request, user):
         lang = 'en'
 
     if request.method == 'GET':
+        page_str = request.query_params.get('page')
+        perPage_str = request.query_params.get('per_page')
+        if page_str is None or page_str == '':
+            page = 0
+        else:
+            page = int(page_str)
+
+        if perPage_str is None or perPage_str == '':
+            perPage = 10
+        else:
+            perPage = int(perPage_str)
+
         pays = Paylips.objects.filter(Q(user_id=user)).order_by('name')
+
+        total_count = pays.count()
+        paginator = Paginator(pays, perPage)  # Show users per page
+
+        try:
+            pays = paginator.get_page(page + 1)
+        except PageNotAnInteger:
+            pays = paginator.page(1)
+        except EmptyPage:
+            pays = paginator.page(paginator.num_pages)
+
         data = getPaylipData(pays)
 
-        return Response(data={'success': True, 'data': data}, status=status.HTTP_200_OK)
+        return Response(data={'success': True, 'data': data, 'totalRowCount': total_count}, status=status.HTTP_200_OK)
     elif request.method == 'POST':
         name = request.POST.get('name')
         file_url = request.POST.get('file_urls')

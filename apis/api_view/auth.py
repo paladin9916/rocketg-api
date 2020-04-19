@@ -80,7 +80,7 @@ def signOut(request):
         
         isLogin = isLoginUser(request)
         if isLogin == False:
-            return Response(data={'success': False, 'error': [translation.gettext('Session time out')]},
+            return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
                             status=status.HTTP_200_OK)
 
         dsession = Dsessions.objects.filter(Q(session_id=token))
