@@ -27,7 +27,7 @@ def componyGetSave(request):
 
     isLogin = isLoginUser(request)
     if isLogin == False:
-        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
                         status=status.HTTP_200_OK)
 
     if request.method == 'GET':
@@ -48,7 +48,7 @@ def componyGetSave(request):
         try:
             companyList = Companies.objects.all().order_by('created_at')
         except Companies.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in getting company.')]}, status=status.HTTP_200_OK)
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in getting company.')]}, status=status.HTTP_200_OK)
 
         total_count = companyList.count()
         paginator = Paginator(companyList, perPage)  # Show users per page
@@ -61,7 +61,7 @@ def componyGetSave(request):
             companies = paginator.page(paginator.num_pages)
 
         companyData = getCompanyData(companies, lang)
-        return Response(data={'success': True, 'data': companyData, 'totalRowCount': total_count}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': companyData, 'totalRowCount': total_count}, status=status.HTTP_200_OK)
     elif request.method == 'POST':
         name = request.POST.get('name')
         website = request.POST.get('website')
@@ -74,9 +74,9 @@ def componyGetSave(request):
         try:
             company.save()
         except Companies.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in creating company.')]}, status=status.HTTP_200_OK)
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in creating company.')]}, status=status.HTTP_200_OK)
         companyData = getCompanyData([company, ], lang)
-        return Response(data={'success': True, 'data': companyData}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': companyData}, status=status.HTTP_200_OK)
 
 
 @api_view(['PUT'])
@@ -95,14 +95,14 @@ def componyUpdate(request, pk):
 
     isLogin = isLoginUser(request)
     if isLogin == False:
-        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
                         status=status.HTTP_200_OK)
 
     if request.method == 'PUT':
         try:
             company = Companies.objects.get(pk=pk)
         except Companies.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Company do not exist.')]},
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Company do not exist.')]},
                             status=status.HTTP_200_OK)
 
         name = request.POST.get('name')
@@ -126,9 +126,9 @@ def componyUpdate(request, pk):
         try:
             company.save()
         except Companies.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in updating company.')]}, status=status.HTTP_200_OK)
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in updating company.')]}, status=status.HTTP_200_OK)
         companyData = getCompanyData([company, ], lang)
-        return Response(data={'success': True, 'data': companyData}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': companyData}, status=status.HTTP_200_OK)
 
 @api_view(['PUT', 'GET'])
 def specialUsers(request, pk):
@@ -146,7 +146,7 @@ def specialUsers(request, pk):
 
     isLogin = isLoginUser(request)
     if isLogin == False:
-        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
                         status=status.HTTP_200_OK)
 
     companyId = pk
@@ -154,7 +154,7 @@ def specialUsers(request, pk):
     try:
         company = Companies.objects.get(pk=pk)
     except Companies.DoesNotExist:
-        return Response(data={'success': False, 'error': [translation.gettext('Company do not exist.')]},
+        return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Company do not exist.')]},
                         status=status.HTTP_200_OK)
 
     if request.method == 'PUT':
@@ -202,9 +202,9 @@ def specialUsers(request, pk):
         try:
             company.save()
         except Companies.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in updating company.')]}, status=status.HTTP_200_OK)
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in updating company.')]}, status=status.HTTP_200_OK)
         companyData = getCompanyData([company, ], lang)
-        return Response(data={'success': True, 'data': companyData}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': companyData}, status=status.HTTP_200_OK)
 
     elif request.method == 'GET':
         userIds = []
@@ -240,7 +240,7 @@ def specialUsers(request, pk):
         if company.reimburse_user_id == None and company.step_users & 0b0001 > 0:
             data["reimburse"] = "direct_user"
         
-        return Response(data={'success': True, 'data': data}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': data}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def specialUser(request, pk, privilege):
@@ -258,7 +258,7 @@ def specialUser(request, pk, privilege):
 
     isLogin = isLoginUser(request)
     if isLogin == False:
-        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
                         status=status.HTTP_200_OK)
 
     companyId = pk
@@ -266,7 +266,7 @@ def specialUser(request, pk, privilege):
     try:
         company = Companies.objects.get(pk=pk)
     except Companies.DoesNotExist:
-        return Response(data={'success': False, 'error': [translation.gettext('Company do not exist.')]},
+        return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Company do not exist.')]},
                         status=status.HTTP_200_OK)
 
     users = None
@@ -281,7 +281,7 @@ def specialUser(request, pk, privilege):
 
     userData = getUserData(users)
     
-    return Response(data={'success': True, 'data': userData}, status=status.HTTP_200_OK)
+    return Response(data={'code': 0, 'success': True, 'data': userData}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def specialUsersForUser(request):
@@ -299,7 +299,7 @@ def specialUsersForUser(request):
 
     isLogin = isLoginUser(request)
     if isLogin == False:
-        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
                         status=status.HTTP_200_OK)
     
     me = login_user = Users.objects.get(email=uid)
@@ -356,7 +356,7 @@ def specialUsersForUser(request):
             else:                
                 data["reimburse"] = "direct_user"
         
-        return Response(data={'success': True, 'data': data}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': data}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def specialUserForUser(request, privilege):
@@ -374,7 +374,7 @@ def specialUserForUser(request, privilege):
 
     isLogin = isLoginUser(request)
     if isLogin == False:
-        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
                         status=status.HTTP_200_OK)
 
     companyId = pk
@@ -382,7 +382,7 @@ def specialUserForUser(request, privilege):
     try:
         company = Companies.objects.get(pk=pk)
     except Companies.DoesNotExist:
-        return Response(data={'success': False, 'error': [translation.gettext('Company do not exist.')]},
+        return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Company do not exist.')]},
                         status=status.HTTP_200_OK)
 
     users = None
@@ -397,4 +397,4 @@ def specialUserForUser(request, privilege):
 
     userData = getUserData(users)
     
-    return Response(data={'success': True, 'data': userData}, status=status.HTTP_200_OK)
+    return Response(data={'code': 0, 'success': True, 'data': userData}, status=status.HTTP_200_OK)

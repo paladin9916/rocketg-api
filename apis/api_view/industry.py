@@ -25,7 +25,7 @@ def industryGet(request):
 
     isLogin = isLoginUser(request)
     if isLogin == False:
-        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
                         status=status.HTTP_200_OK)
 
     if request.method == 'GET':
@@ -33,7 +33,7 @@ def industryGet(request):
         try:
             industryList = Industry_locales.objects.filter(Q(language=lang)).order_by('industry_id')
         except Industry_locales.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in getting industry.')]}, status=status.HTTP_200_OK)
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in getting industry.')]}, status=status.HTTP_200_OK)
 
         industryData = getIndustryData(industryList)
-        return Response(data={'success': True, 'data': industryData}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': industryData}, status=status.HTTP_200_OK)

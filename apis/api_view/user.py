@@ -30,7 +30,7 @@ def userGetSave(request):
 
     isLogin = isLoginUser(request)
     if isLogin == False:
-        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
                         status=status.HTTP_200_OK)
 
     if request.method == 'GET':
@@ -59,7 +59,7 @@ def userGetSave(request):
                 userList = userList.filter(Q(email__contains=searchKey) | Q(firstname__contains=searchKey) | Q(
                                                 lastname__contains=searchKey)).order_by('id')
         except Users.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in getting user.')]}, status=status.HTTP_200_OK)
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in getting user.')]}, status=status.HTTP_200_OK)
 
         total_count = userList.count()
         paginator = Paginator(userList, perPage)  # Show users per page
@@ -72,7 +72,7 @@ def userGetSave(request):
             users = paginator.page(paginator.num_pages)
 
         userData = getUserData(users)
-        return Response(data={'success': True, 'data': userData, 'totalRowCount': total_count},
+        return Response(data={'code': 0, 'success': True, 'data': userData, 'totalRowCount': total_count},
                         status=status.HTTP_200_OK)
     elif request.method == 'POST':
         email = request.POST.get('email')
@@ -94,12 +94,12 @@ def userGetSave(request):
 
         try:
             if Users.objects.get(email=email):
-                return Response(data={'success': False, 'error': [translation.gettext('Exist this email. Please try again.')]},
+                return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Exist this email. Please try again.')]},
                                 status=status.HTTP_200_OK)
         except Users.DoesNotExist:
             try:
                 if Users.objects.get(phone=phone):
-                    return Response(data={'success': False, 'error': [translation.gettext('Exist this phone number. Please try again.')]},
+                    return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Exist this phone number. Please try again.')]},
                                     status=status.HTTP_200_OK)
             except Users.DoesNotExist:
                 password = get_random_string(length=16)
@@ -118,12 +118,12 @@ def userGetSave(request):
                     company.active_employees += 1
                     company.save()
                 except Users.DoesNotExist:
-                    return Response(data={'success': False, 'error': [translation.gettext('Error in creating User.')]},
+                    return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in creating User.')]},
                                     status=status.HTTP_200_OK)
                 user.save()
 
                 userData = getUserDataWithPW([user, ])
-                return Response(data={'success': True, 'data': userData}, status=status.HTTP_200_OK)
+                return Response(data={'code': 0, 'success': True, 'data': userData}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'PUT'])
@@ -142,18 +142,18 @@ def userDetailUpdate(request, pk):
 
     isLogin = isLoginUser(request)
     if isLogin == False:
-        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
                         status=status.HTTP_200_OK)
 
     try:
         user = Users.objects.get(pk=pk)
     except Users.DoesNotExist:
-        return Response(data={'success': False, 'error': [translation.gettext('User do not exist.')]},
+        return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('User do not exist.')]},
                         status=status.HTTP_200_OK)
 
     if request.method == 'GET':
         userData = getUserData([user, ])
-        return Response(data={'success': True, 'data': userData}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': userData}, status=status.HTTP_200_OK)
     elif request.method == 'PUT':
         email = request.POST.get('email')
         # password = request.POST.get('password')
@@ -175,12 +175,12 @@ def userDetailUpdate(request, pk):
 
         try:
             if Users.objects.get(~Q(id=pk), Q(email=email)):
-                return Response(data={'success': False, 'error': [translation.gettext('Exist this email. Please try again.')]},
+                return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Exist this email. Please try again.')]},
                                 status=status.HTTP_200_OK)
         except Users.DoesNotExist:
             try:
                 if Users.objects.get(~Q(id=pk), Q(phone=phone)):
-                    return Response(data={'success': False, 'error': [translation.gettext('Exist this phone number. Please try again.')]},
+                    return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Exist this phone number. Please try again.')]},
                                     status=status.HTTP_200_OK)
             except Users.DoesNotExist:
                 if (user.avatar != None and avatar == None) or (user.avatar != None and user.avatar.strip() != avatar.strip()):
@@ -209,11 +209,11 @@ def userDetailUpdate(request, pk):
                 try:
                     user.save()
                 except Users.DoesNotExist:
-                    return Response(data={'success': False, 'error': [translation.gettext('Error in updating user.')]},
+                    return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in updating user.')]},
                                     status=status.HTTP_200_OK)
 
                 userData = getUserData([user, ])
-                return Response(data={'success': True, 'data': userData}, status=status.HTTP_200_OK)
+                return Response(data={'code': 0, 'success': True, 'data': userData}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -231,7 +231,7 @@ def resetPassword(request):
 
         isLogin = isLoginUser(request)
         if isLogin == False:
-            return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+            return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
                             status=status.HTTP_200_OK)
 
         password = get_random_string(length=16)
@@ -244,7 +244,7 @@ def resetPassword(request):
             user.encrypted_password = encryptedPassword
             user.save()
         except Users.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in reseting password.')]},
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in reseting password.')]},
                             status=status.HTTP_200_OK)
 
-        return Response(data={'success': True, 'data': {"password": password}}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': {"password": password}}, status=status.HTTP_200_OK)

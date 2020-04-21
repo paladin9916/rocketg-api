@@ -35,9 +35,9 @@ def reportSave(request):
     try:
         report.save()
     except Reports.DoesNotExist:
-        return Response(data={'success': False, 'error': [translation.gettext('Error in creating report.')]}, status=status.HTTP_200_OK)
+        return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in creating report.')]}, status=status.HTTP_200_OK)
     reportData = getReportDetail([report, ])
-    return Response(data={'success': True, 'data': reportData}, status=status.HTTP_200_OK)
+    return Response(data={'code': 0, 'success': True, 'data': reportData}, status=status.HTTP_200_OK)
 
 def getReportData(reports, totals, wants_currency):
     reportData = []
@@ -94,13 +94,13 @@ def reportList(request):
         totals = getTotalForReports(report_ids, assigneeId, expense_status)
 
     reportData = getReportData(reportData, totals, wants_currency)
-    return Response(data={'success': True, 'data': reportData}, status=status.HTTP_200_OK)
+    return Response(data={'code': 0, 'success': True, 'data': reportData}, status=status.HTTP_200_OK)
 
 @api_view(['POST', 'GET'])
 def reports(request):
     isLogin = isLoginUser(request)
     if isLogin == False:
-        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
                         status=status.HTTP_200_OK)
 
     if request.method == 'POST':
@@ -124,14 +124,14 @@ def deleteReport(request, pk):
 
     isLogin = isLoginUser(request)
     if isLogin == False:
-        return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
                         status=status.HTTP_200_OK)
 
     try:
         report = Reports.objects.get(pk=pk)
         report.delete()
     except Expenses.DoesNotExist:
-        return Response(data={'success': False, 'error': [translation.gettext('Report do not exist.')]},
+        return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Report do not exist.')]},
                         status=status.HTTP_200_OK)
 
-    return Response(data={'success': True}, status=status.HTTP_200_OK)
+    return Response(data={'code': 0, 'success': True}, status=status.HTTP_200_OK)
