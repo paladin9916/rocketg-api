@@ -10,6 +10,27 @@ from apis.models import Users, Paylips
 
 from django.utils import translation
 
+@api_view(['GET'])
+def myPaylips(request):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+    if lang is not None:
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
+    
+    if request.method == 'GET':
+        me = login_user = Users.objects.get(email=uid)
+        pays = Paylips.objects.filter(Q(user_id=me.id)).order_by('name')
+        data = getPaylipData(pays)
+
+        return Response(data={'success': True, 'data': data}, status=status.HTTP_200_OK)
+
 @api_view(['POST', 'GET'])
 def paylips(request, user):
     token = request.headers.get('access-token')

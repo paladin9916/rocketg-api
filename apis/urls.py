@@ -39,4 +39,6 @@ urlpatterns = [
 
     path('user/special_privilege', company.specialUsersForUser),
     path('user/special_privilege/<slug:privilege>', company.specialUserForUser),
+
+    path('user/paylips', paylip.myPaylips)
 ]
