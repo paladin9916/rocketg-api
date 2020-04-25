@@ -40,7 +40,7 @@ def signIn(request):
         try:
             login_user = Users.objects.get(email=email, encrypted_password=encrypted_pw)
         except Users.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Invalid login credentials. Please try again.')]},
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Invalid login credentials. Please try again.')]},
                             status=status.HTTP_200_OK)
 
         # Auth Token
@@ -60,7 +60,7 @@ def signIn(request):
         request.session['client'] = client
         request.session['uid'] = login_user.uid
         resultUserData = getUserData([login_user, ])[0]
-        return Response(data={'success': True, 'data': resultUserData}, status=status.HTTP_200_OK, headers={'client': client, 'uid': login_user.uid, 'access-token': token_key})
+        return Response(data={'code': 0, 'success': True, 'data': resultUserData}, status=status.HTTP_200_OK, headers={'client': client, 'uid': login_user.uid, 'access-token': token_key})
 
 
 @api_view(['DELETE'])
@@ -78,20 +78,20 @@ def signOut(request):
         elif lang is None or lang == '':
             lang = 'en'
         
-        # isLogin = isLoginUser(request)
-        # if isLogin == False:
-        #     return Response(data={'success': False, 'error': [translation.gettext('Session expired')]},
-        #                     status=status.HTTP_200_OK)
+        isLogin = isLoginUser(request)
+        if isLogin == False:
+            return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
+                            status=status.HTTP_200_OK)
 
         dsession = Dsessions.objects.filter(Q(session_id=token))
         try:
             dsession.delete()
         except KeyError:
-            return Response(data={'success': True}, status=status.HTTP_200_OK)
-            # return Response(data={'success': False, 'error': [translation.gettext('Error in signing out')]},
-            #                 status=status.HTTP_200_OK)
+            # return Response(data={'code': 0, 'success': True}, status=status.HTTP_200_OK)
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in signing out')]},
+                            status=status.HTTP_200_OK)
 
-        return Response(data={'success': True}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

@@ -27,7 +27,7 @@ def getPaylipData(paylips):
 
 def isLoginUser(request):
     now = gdatetime.now()
-    session_timeout = now - timedelta(hours=1)
+    session_timeout = now - timedelta(minutes=45)
     Dsessions.objects.filter(updated_at__lt=session_timeout).delete()
 
     token = request.headers.get('access-token')
@@ -35,6 +35,7 @@ def isLoginUser(request):
     uid = request.headers.get('uid')
     dsession = Dsessions.objects.filter(Q(session_id=token))
     if dsession and len(dsession) == 1 and dsession[0].client == client and dsession[0].uid == uid:
+        dsession[0].save()
         return True
     else:
         return False    

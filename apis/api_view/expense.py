@@ -25,6 +25,11 @@ def expenseSave(request):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
+                        status=status.HTTP_200_OK)
+
     if request.method == 'POST':
         merchant_name = request.POST.get('merchant_name')
         receipt_date = request.POST.get('receipt_date')
@@ -97,16 +102,16 @@ def expenseSave(request):
                 payments_currency=user.payments_currency
             )
         else:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK)
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK)
 
         try:
             expense.save()
         except Expenses.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK)
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK)
 
         expenseData = getExpenseDetail([expense, ])
 
-    return Response(data={'success': True, 'data': expenseData}, status=status.HTTP_200_OK)
+    return Response(data={'code': 0, 'success': True, 'data': expenseData}, status=status.HTTP_200_OK)
 
 @api_view(['PUT', 'DELETE'])
 def expenseUpdate(request, pk):
@@ -122,16 +127,21 @@ def expenseUpdate(request, pk):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
+                        status=status.HTTP_200_OK)
+
     expense = None
     try:
         expense = Expenses.objects.get(pk=pk)
     except Expenses.DoesNotExist:
-        return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
+        return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Expense do not exist.')]},
                         status=status.HTTP_200_OK)
 
     if request.method == 'PUT':
         if int(expense.status) > 0:
-            return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Expense do not exist.')]},
                         status=status.HTTP_200_OK)
         
         merchant_name = request.POST.get('merchant_name')
@@ -196,20 +206,20 @@ def expenseUpdate(request, pk):
             expense.approve_user_id = approve_user_id
             expense.reimburse_user_id = reimburse_user_id
         else:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK) 
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK) 
 
         try:
             expense.save()
         except Expenses.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in updating Expense.')]}, status=status.HTTP_200_OK)
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in updating Expense.')]}, status=status.HTTP_200_OK)
 
         expenseData = getExpenseDetail([expense, ])
 
-        return Response(data={'success': True, 'data': expenseData}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': expenseData}, status=status.HTTP_200_OK)
 
     elif request.method == 'DELETE':
         if int(expense.status) > 1:
-            return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Expense do not exist.')]},
                         status=status.HTTP_200_OK)
         
         if expense.file_urls != None:
@@ -223,9 +233,9 @@ def expenseUpdate(request, pk):
         try:
             expense.delete()
         except Expenses.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in deleting Expense.')]}, status=status.HTTP_200_OK)
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in deleting Expense.')]}, status=status.HTTP_200_OK)
 
-        return Response(data={'success': True}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 def expenseChangeSatusInReport(request, report):
@@ -240,6 +250,11 @@ def expenseChangeSatusInReport(request, report):
             translation.activate(lang)
     elif lang is None or lang == '':
         lang = 'en'
+
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
+                        status=status.HTTP_200_OK)
 
     assigneeId = request.POST.get('assignee_id')
     expense_status = request.POST.get('from_status')
@@ -261,7 +276,7 @@ def expenseChangeSatusInReport(request, report):
 
     expenses = oExpense.all()
     expenses.update(status=expense_to_status)
-    return Response(data={'success': True}, status=status.HTTP_200_OK)
+    return Response(data={'code': 0, 'success': True}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -278,6 +293,11 @@ def expenseChangeStatus(request):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
+                        status=status.HTTP_200_OK)
+
     if request.method == 'POST':
         id = int(request.POST.get('id'))
         statusNum = int(request.POST.get('status'))
@@ -285,7 +305,7 @@ def expenseChangeStatus(request):
         try:
             expense = Expenses.objects.get(id=id)
         except Expenses.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Expense do not exist.')]},
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Expense do not exist.')]},
                             status=status.HTTP_200_OK)
 
         expense.status = statusNum
@@ -293,9 +313,9 @@ def expenseChangeStatus(request):
         try:
             expense.save()
         except Expenses.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in updating Expense Status.')]}, status=status.HTTP_200_OK)
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in updating Expense Status.')]}, status=status.HTTP_200_OK)
 
-    return Response(data={'success': True}, status=status.HTTP_200_OK)
+    return Response(data={'code': 0, 'success': True}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def expenseCount(request):
@@ -311,12 +331,17 @@ def expenseCount(request):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
+                        status=status.HTTP_200_OK)
+
     assigneeId = request.query_params.get('assignee_id')
     user_id = request.query_params.get('user_id')
     expense_status = request.query_params.get('status')
     
     countData = getCountForStatus(assigneeId, expense_status)
-    return Response(data={'success': True, 'data': {'count': countData}}, status=status.HTTP_200_OK)
+    return Response(data={'code': 0, 'success': True, 'data': {'count': countData}}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def expensesInReport(request, report):
@@ -331,6 +356,11 @@ def expensesInReport(request, report):
             translation.activate(lang)
     elif lang is None or lang == '':
         lang = 'en'
+
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
+                        status=status.HTTP_200_OK)
 
     assigneeId = request.query_params.get('assignee_id')
     wants_currency = request.query_params.get('wants_currency')
@@ -357,4 +387,4 @@ def expensesInReport(request, report):
 
     expenses = oExpense.all()
     expenseData = getExpenseData(expenses, wants_currency)
-    return Response(data={'success': True, 'data': expenseData}, status=status.HTTP_200_OK)
+    return Response(data={'code': 0, 'success': True, 'data': expenseData}, status=status.HTTP_200_OK)

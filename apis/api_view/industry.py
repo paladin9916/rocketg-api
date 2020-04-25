@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from apis.api_view.utility import getIndustryData
+from apis.api_view.utility import getIndustryData, isLoginUser
 from apis.models import Industry_locales
 
 from django.utils import translation
@@ -23,12 +23,17 @@ def industryGet(request):
     elif lang is None or lang == '':
         lang = 'en'
 
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
+                        status=status.HTTP_200_OK)
+
     if request.method == 'GET':
         industryList = None
         try:
             industryList = Industry_locales.objects.filter(Q(language=lang)).order_by('industry_id')
         except Industry_locales.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in getting industry.')]}, status=status.HTTP_200_OK)
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in getting industry.')]}, status=status.HTTP_200_OK)
 
         industryData = getIndustryData(industryList)
-        return Response(data={'success': True, 'data': industryData}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': industryData}, status=status.HTTP_200_OK)

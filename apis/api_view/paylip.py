@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from apis.api_view.utility import getPaylipData
+from apis.api_view.utility import getPaylipData, isLoginUser
 from apis.models import Users, Paylips
 
 from django.utils import translation
@@ -23,6 +23,11 @@ def myPaylips(request):
             translation.activate(lang)
     elif lang is None or lang == '':
         lang = 'en'
+
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
+                        status=status.HTTP_200_OK)
     
     if request.method == 'GET':
         page_str = request.query_params.get('page')
@@ -52,7 +57,7 @@ def myPaylips(request):
 
         data = getPaylipData(pays)
 
-        return Response(data={'success': True, 'data': data, 'totalRowCount': total_count}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': data, 'totalRowCount': total_count}, status=status.HTTP_200_OK)
 
 @api_view(['POST', 'GET'])
 def paylips(request, user):
@@ -67,6 +72,11 @@ def paylips(request, user):
             translation.activate(lang)
     elif lang is None or lang == '':
         lang = 'en'
+
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
+                        status=status.HTTP_200_OK)
 
     if request.method == 'GET':
         page_str = request.query_params.get('page')
@@ -95,7 +105,7 @@ def paylips(request, user):
 
         data = getPaylipData(pays)
 
-        return Response(data={'success': True, 'data': data, 'totalRowCount': total_count}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': data, 'totalRowCount': total_count}, status=status.HTTP_200_OK)
     elif request.method == 'POST':
         name = request.POST.get('name')
         file_url = request.POST.get('file_urls')
@@ -112,6 +122,6 @@ def paylips(request, user):
             u.paylips_count += 1
             u.save()
         except Users.DoesNotExist:
-            return Response(data={'success': False, 'error': [translation.gettext('Error in creating company.')]}, status=status.HTTP_200_OK)
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in creating company.')]}, status=status.HTTP_200_OK)
 
-        return Response(data={'success': True, 'data': 'success'}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': 'success'}, status=status.HTTP_200_OK)
