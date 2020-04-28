@@ -171,7 +171,7 @@ def getTotalForReports(ids, assignee = None, status = None):
             | Q(open_user_id=assignee) | Q(processing_user_id=assignee) | Q(approve_user_id=assignee) | Q(reimburse_user_id=assignee))).values(
             'report_id', 
             'currency_type').annotate(total_amount=Sum('total_amount'), count=Count('id'))
-        
+
         return totalForReport
     else:
         totalForReport = Expenses.objects.filter(
@@ -194,7 +194,7 @@ def getTotalForReports(ids, assignee = None, status = None):
                     break
 
             ret.append(oCount)
-        
+
         return ret
 
 def getUsersWithIds(ids):
@@ -409,33 +409,43 @@ def uploadImage(userId, imageInfo):
 
 def exchangeMoney(money, fromNum, toNum):
     money = float(money)
-    fromNum = int(fromNum)
-    toNum = int(toNum)
+    fromNum = fromNum
+    toNum = toNum
 
     today = datetime.date.today()
-    if constants.g_today != today:
-        constants.g_utc = RealTimeCurrencyExchangeRate("USD", "CNY", constants.api_key)
-        constants.g_etc = RealTimeCurrencyExchangeRate("EUR", "CNY", constants.api_key)
-        constants.g_ctu = RealTimeCurrencyExchangeRate("CNY", "USD", constants.api_key)
-        constants.g_etu = RealTimeCurrencyExchangeRate("EUR", "USD", constants.api_key)
-        constants.g_ute = RealTimeCurrencyExchangeRate("USD", "EUR", constants.api_key)
-        constants.g_cte = RealTimeCurrencyExchangeRate("CNY", "EUR", constants.api_key)
-        constants.g_today = today
+    if fromNum + "_" + toNum + "_date" in constants.g_currency_rate:
+        if constants.g_currency_rate[fromNum + "_" + toNum + "_date"] != today:
+            constants.g_currency_rate[fromNum + "_" + toNum] = RealTimeCurrencyExchangeRate(fromNum, toNum, constants.api_key)
+            constants.g_currency_rate[fromNum + "_" + toNum + "_date"] = today
+    else:
+        constants.g_currency_rate[fromNum + "_" + toNum] = RealTimeCurrencyExchangeRate(fromNum, toNum, constants.api_key)
+        constants.g_currency_rate[fromNum + "_" + toNum + "_date"] = today
+    
+    # if constants.g_today != today:
+    #     constants.g_utc = RealTimeCurrencyExchangeRate("USD", "CNY", constants.api_key)
+    #     constants.g_etc = RealTimeCurrencyExchangeRate("EUR", "CNY", constants.api_key)
+    #     constants.g_ctu = RealTimeCurrencyExchangeRate("CNY", "USD", constants.api_key)
+    #     constants.g_etu = RealTimeCurrencyExchangeRate("EUR", "USD", constants.api_key)
+    #     constants.g_ute = RealTimeCurrencyExchangeRate("USD", "EUR", constants.api_key)
+    #     constants.g_cte = RealTimeCurrencyExchangeRate("CNY", "EUR", constants.api_key)
+    #     constants.g_today = today
 
-    if fromNum == toNum:
-        money = money
-    elif fromNum == 1 and toNum == 2:
-        money = money * constants.g_ute
-    elif fromNum == 1 and toNum == 3:
-        money = money * constants.g_utc
-    elif fromNum == 2 and toNum == 1:
-        money = money * constants.g_etu
-    elif fromNum == 2 and toNum == 3:
-        money = money * constants.g_etc
-    elif fromNum == 3 and toNum == 1:
-        money = money * constants.g_ctu
-    elif fromNum == 3 and toNum == 2:
-        money = money * constants.g_cte
+    # if fromNum == toNum:
+    #     money = money
+    # elif fromNum == 1 and toNum == 2:
+    #     money = money * constants.g_ute
+    # elif fromNum == 1 and toNum == 3:
+    #     money = money * constants.g_utc
+    # elif fromNum == 2 and toNum == 1:
+    #     money = money * constants.g_etu
+    # elif fromNum == 2 and toNum == 3:
+    #     money = money * constants.g_etc
+    # elif fromNum == 3 and toNum == 1:
+    #     money = money * constants.g_ctu
+    # elif fromNum == 3 and toNum == 2:
+    #     money = money * constants.g_cte
+
+    money = money * constants.g_currency_rate[fromNum + "_" + toNum]
 
     return money
 

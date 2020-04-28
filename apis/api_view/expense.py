@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from django.core.files.storage import FileSystemStorage
 
 from apis.api_view.utility import *
+from apis.api_view import constants
 from apis.models import Expenses, Users, Companies
 from django.db.models import Q, Sum
 
@@ -35,7 +36,7 @@ def expenseSave(request):
         receipt_date = request.POST.get('receipt_date')
         description = request.POST.get('description')
         total_amount = float(request.POST.get('total_amount'))
-        currency_type = int(request.POST.get('currency_type'))
+        currency_type = request.POST.get('currency_type')
         category = int(request.POST.get('category'))
         assignees = request.POST.get('assignees')
         file_urls = request.POST.get('file_urls')
@@ -44,6 +45,11 @@ def expenseSave(request):
         report_id = int(request.POST.get('report_id'))
         company_id = int(request.POST.get('company_id'))
         statusNum = int(request.POST.get('status'))
+
+        if currency_type in constants.g_currency_keys:
+            None
+        else:
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK) 
 
         user = Users.objects.get(pk=user_id)
         company = Companies.objects.get(pk=company_id)
@@ -148,7 +154,7 @@ def expenseUpdate(request, pk):
         receipt_date = request.POST.get('receipt_date')
         description = request.POST.get('description')
         total_amount = float(request.POST.get('total_amount'))
-        currency_type = int(request.POST.get('currency_type'))
+        currency_type = request.POST.get('currency_type')
         category = int(request.POST.get('category'))
         assignees = request.POST.get('assignees')
         file_urls = request.POST.get('file_urls')
@@ -157,6 +163,11 @@ def expenseUpdate(request, pk):
         report_id = int(request.POST.get('report_id'))
         company_id = int(request.POST.get('company_id'))
         statusNum = int(request.POST.get('status'))
+
+        if currency_type in constants.g_currency_keys:
+            None
+        else:
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in creating Expense.')]}, status=status.HTTP_200_OK) 
 
         user = Users.objects.get(pk=user_id)
         company = Companies.objects.get(pk=company_id)
@@ -370,7 +381,7 @@ def expensesInReport(request, report):
     per_page = request.query_params.get('per_page')
 
     if wants_currency == None:
-        wants_currency = 3
+        wants_currency = "CNY"
 
     expenseData = []
     oExpense = Expenses.objects.filter(Q(report_id=report))

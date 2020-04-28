@@ -17,7 +17,6 @@ class ImageUploadView(APIView):
     parser_class = (FileUploadParser,)
 
     def post(self, request, *args, **kwargs):
-        print(request.FILES)
         uploaded_file = request.FILES['avatar']
         
         filePath = ''

@@ -6,6 +6,7 @@ from django.core.files.storage import FileSystemStorage
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from apis.api_view import constants
 
 from RocketG_api import settings
 from apis.api_view.utility import getUserData, uploadImage, getUserDataWithPW, isLoginUser
@@ -87,7 +88,13 @@ def userGetSave(request):
         reporterId = request.POST.get('reporter_id')
         avatar = request.POST.get('avatar')
         reimbursementCycle = int(request.POST.get('reimbursement_cycle'))
-        paymentsCurrency = int(request.POST.get('payments_currency'))
+        paymentsCurrency = request.POST.get('payments_currency')
+
+        if paymentsCurrency in constants.g_currency_keys:
+            None
+        else:
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in creating User.')]},
+                                    status=status.HTTP_200_OK)
 
         if reporterId != None:
             reporterId = int(reporterId)
@@ -168,7 +175,13 @@ def userDetailUpdate(request, pk):
         reporterId = request.POST.get('reporter_id')
         avatar = request.POST.get('avatar')
         reimbursementCycle = int(request.POST.get('reimbursement_cycle'))
-        paymentsCurrency = int(request.POST.get('payments_currency'))
+        paymentsCurrency = request.POST.get('payments_currency')
+
+        if paymentsCurrency in constants.g_currency_keys:
+            None
+        else:
+            return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Error in updating user.')]},
+                                    status=status.HTTP_200_OK)
 
         if reporterId != None:
             reporterId = int(reporterId)
