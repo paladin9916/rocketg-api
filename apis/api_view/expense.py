@@ -12,6 +12,38 @@ from django.db.models import Q, Sum
 
 from django.utils import translation
 
+@api_view(['GET'])
+def recentCurrencies(request):
+    token = request.headers.get('access-token')
+    client = request.headers.get('client')
+    uid = request.headers.get('uid')
+    lang = request.headers.get('lang')
+    if lang is not None:
+        if lang == 'zh':
+            translation.activate('ch')
+        else:
+            translation.activate(lang)
+    elif lang is None or lang == '':
+        lang = 'en'
+
+    isLogin = isLoginUser(request)
+    if isLogin == False:
+        return Response(data={'code': 1, 'success': False, 'error': [translation.gettext('Your session expired, please log in.')]},
+                        status=status.HTTP_200_OK)
+    
+    me = login_user = Users.objects.get(email=uid)
+
+    currencies = []
+    for x in [0, 1, 2]:
+        expenses = Expenses.objects.filter(Q(user_id=me.id)).exclude(Q(currency_type__in=currencies)).order_by('updated_at')[:1]
+        if len(expenses) == 1:
+            currencies.append(expenses[0].currency_type)
+        else:
+            break
+    
+    return Response(data={'code': 0, 'success': True, 'data': currencies}, status=status.HTTP_200_OK)
+
+
 @api_view(['POST'])
 def expenseSave(request):
     token = request.headers.get('access-token')
