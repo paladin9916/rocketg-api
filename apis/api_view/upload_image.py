@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-from apis.api_view.utility import uploadImage
+from apis.api_view.utility import uploadImage, isLoginUser
 from apis.models import Users
 
 
@@ -39,4 +39,4 @@ class ImageUploadView(APIView):
         
         fs.save(filePath, uploaded_file)
 
-        return Response(data={'success': True, 'data': {'avatar': settings.MEDIA_URL + filePath}}, status=status.HTTP_200_OK)
+        return Response(data={'code': 0, 'success': True, 'data': {'avatar': settings.MEDIA_URL + filePath}}, status=status.HTTP_200_OK)
