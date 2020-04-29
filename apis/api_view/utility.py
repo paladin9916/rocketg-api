@@ -453,18 +453,21 @@ def exchangeMoney(money, fromNum, toNum):
 def RealTimeCurrencyExchangeRate(from_currency, to_currency, api_key):
 
     # base_url variable store base url
-    base_url = r"https://api.exchangerate-api.com/v4/latest/"
+    # base_url = r"https://api.exchangerate-api.com/v4/latest/"
+    base_url = r"https://free.currconv.com/api/v7/convert?apiKey=" + r"b49ff058bf1efe40289f" + r"&q=" + from_currency + r"_" + to_currency + r"&compact=y"
+
 
     # main_url variable store complete url
-    main_url = base_url + from_currency
+    # main_url = base_url + from_currency
     
     # get method of requests module
     # return response object
-    req_ob = requests.get(main_url)
+    req_ob = requests.get(base_url)
 
     # json method return json format
     # data into python dictionary data type.
 
     # result contains list of nested dictionaries
     result = req_ob.json()
-    return float(result.get('rates').get(to_currency))
+    # return float(result.get('rates').get(to_currency))
+    return float(result.get(from_currency + r"_" + to_currency).get("val"))
