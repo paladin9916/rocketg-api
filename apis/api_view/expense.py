@@ -34,7 +34,7 @@ def recentCurrencies(request):
     me = login_user = Users.objects.get(email=uid)
 
     currencies = []
-    for x in range(0, 10):
+    for x in range(0, 5):
         expenses = Expenses.objects.filter(Q(user_id=me.id)).exclude(Q(currency_type__in=currencies)).order_by('updated_at')[:1]
         if len(expenses) == 1:
             currencies.append(expenses[0].currency_type)
