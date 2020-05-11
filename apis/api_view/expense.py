@@ -7,7 +7,7 @@ from django.core.files.storage import FileSystemStorage
 
 from apis.api_view.utility import *
 from apis.api_view import constants
-from apis.models import Expenses, Users, Companies
+from apis.models import Expenses, Users, Companies, Reports
 from django.db.models import Q, Sum
 
 from django.utils import translation
@@ -34,7 +34,7 @@ def recentCurrencies(request):
     me = login_user = Users.objects.get(email=uid)
 
     currencies = []
-    for x in range(0, 5):
+    for x in range(0, 10):
         expenses = Expenses.objects.filter(Q(user_id=me.id)).exclude(Q(currency_type__in=currencies)).order_by('updated_at')[:1]
         if len(expenses) == 1:
             currencies.append(expenses[0].currency_type)
@@ -300,9 +300,13 @@ def expenseChangeSatusInReport(request, report):
                         status=status.HTTP_200_OK)
 
     assigneeId = request.POST.get('assignee_id')
-    expense_status = request.POST.get('from_status')
-    expense_to_status = request.POST.get('to_status')
+    expense_status = int(request.POST.get('from_status'))
+    expense_to_status = int(request.POST.get('to_status'))
     order_by = request.POST.get('order_by')
+
+    eReport = Reports.objects.get(pk=report)
+    user = Users.objects.get(pk=eReport.user_id)
+    company = Companies.objects.get(pk=user.company_id)
 
     expenseData = []
     oExpense = Expenses.objects.filter(Q(report_id=report))
@@ -314,11 +318,27 @@ def expenseChangeSatusInReport(request, report):
         oExpense = oExpense.filter(Q(assignees=assignee) | Q(assignees__startswith=assignee + ",") | Q(assignees__endswith="," + assignee) | Q(assignees__contains="," + assignee + ",")
         | Q(open_user_id=assignee) | Q(processing_user_id=assignee) | Q(approve_user_id=assignee) | Q(reimburse_user_id=assignee))
 
-    if order_by != None:
-        oExpense = oExpense.order_by(order_by)
-
     expenses = oExpense.all()
-    expenses.update(status=expense_to_status)
+
+    if expense_status == 0 and expense_to_status == 1:
+        open_user_id = company.open_user_id
+        processing_user_id = company.processing_user_id
+        approve_user_id = company.approve_user_id
+        reimburse_user_id = company.reimburse_user_id
+
+        if open_user_id == None and company.step_users & 0b1000 > 0:
+            open_user_id = user.reporter_id
+        if processing_user_id == None and company.step_users & 0b0100 > 0:
+            processing_user_id = user.reporter_id
+        if approve_user_id == None and company.step_users & 0b0010 > 0:
+            approve_user_id = user.reporter_id
+        if reimburse_user_id == None and company.step_users & 0b0001 > 0:
+            reimburse_user_id = user.reporter_id
+
+        expenses.update(status=expense_to_status, open_user_id=open_user_id, processing_user_id=processing_user_id, approve_user_id=approve_user_id, reimburse_user_id=reimburse_user_id)
+    else:
+        expenses.update(status=expense_to_status)
+
     return Response(data={'code': 0, 'success': True}, status=status.HTTP_200_OK)
 
 
@@ -344,12 +364,33 @@ def expenseChangeStatus(request):
     if request.method == 'POST':
         id = int(request.POST.get('id'))
         statusNum = int(request.POST.get('status'))
-
-        try:
+        expense = None
+        try:            
             expense = Expenses.objects.get(id=id)
         except Expenses.DoesNotExist:
             return Response(data={'code': 2, 'success': False, 'error': [translation.gettext('Expense do not exist.')]},
                             status=status.HTTP_200_OK)
+
+        company = Companies.objects.get(pk=expense.company_id)
+        if expense.status == 0 and statusNum == 1:
+            open_user_id = company.open_user_id
+            processing_user_id = company.processing_user_id
+            approve_user_id = company.approve_user_id
+            reimburse_user_id = company.reimburse_user_id
+
+            if open_user_id == None and company.step_users & 0b1000 > 0:
+                open_user_id = user.reporter_id
+            if processing_user_id == None and company.step_users & 0b0100 > 0:
+                processing_user_id = user.reporter_id
+            if approve_user_id == None and company.step_users & 0b0010 > 0:
+                approve_user_id = user.reporter_id
+            if reimburse_user_id == None and company.step_users & 0b0001 > 0:
+                reimburse_user_id = user.reporter_id
+
+            expense.open_user_id = open_user_id
+            expense.processing_user_id = processing_user_id
+            expense.approve_user_id = approve_user_id
+            expense.reimburse_user_id = reimburse_user_id
 
         expense.status = statusNum
 
