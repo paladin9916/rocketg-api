@@ -110,7 +110,7 @@ DATABASES = {
         'HOST': '47.103.37.13',
         'PORT': '3306'
     },
-    'default': {
+    'production': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'rl_py_rocketg',
         'USER': 'rocketg_db_1',
