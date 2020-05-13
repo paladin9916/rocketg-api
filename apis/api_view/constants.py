@@ -2,6 +2,10 @@ api_key = 'IDRKVV1IMPRAUBTY'
 
 g_today = None
 
+g_currency_rate = {}
+
+g_currency_keys = ["USD", "EUR", "CNY", "INR", "JPY", "KRW", "SGD", "HKD", "THB", "IDR", "MYR", "PHP", "VND"]
+
 g_utc = 0.0
 g_etc = 0.0
 

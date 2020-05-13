@@ -68,7 +68,7 @@ def reportList(request):
     per_page = request.query_params.get('per_page')
 
     if wants_currency == None:
-        wants_currency = 3
+        wants_currency = "CNY"
 
     if userId != None:
         oReports = Reports.objects.filter(Q(user_id=userId))
