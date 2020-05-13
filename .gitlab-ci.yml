@@ -47,7 +47,7 @@ production:
   - source /home/ec2-user/py-api/venv/bin/activate
   - pip3 install -r /home/ec2-user/py-api/rocketg-api-python/requirements.txt
   - python3 /home/ec2-user/py-api/rocketg-api-python/manage.py makemigrations
-  - python3 /home/ec2-user/py-api/rocketg-api-python/manage.py migrate --database=default
+  - python3 /home/ec2-user/py-api/rocketg-api-python/manage.py migrate --database=production
   - python3 /home/ec2-user/py-api/rocketg-api-python/manage.py test
 
   only:
