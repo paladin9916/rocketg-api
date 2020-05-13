@@ -81,7 +81,7 @@ class Users(models.Model):
     language = models.CharField(max_length=50, null=True)
     reporter = models.ForeignKey('Users', on_delete=models.SET_NULL, blank=True, null=True, related_name='reporter_user')
     company = models.ForeignKey(Companies, on_delete=models.PROTECT, blank=True, null=True)
-    payments_currency = models.IntegerField(default=3, null=False)
+    payments_currency = models.CharField(max_length=3, default="CNY", null=False)
     reimbursement_cycle = models.IntegerField(default=0, null=False)
 
 class Paylips(models.Model):
@@ -99,7 +99,7 @@ class Images(models.Model):
 class Reports(models.Model):
     user = models.ForeignKey(Users, on_delete=models.PROTECT, blank=True, null=True)
     comment = models.TextField(null=True, blank=True)
-    payments_currency = models.IntegerField(default=3, null=False)
+    payments_currency = models.CharField(max_length=3, default="CNY", null=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -121,8 +121,8 @@ class Expenses(models.Model):
     company = models.ForeignKey(Companies, on_delete=models.PROTECT, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    currency_type = models.IntegerField(default=3, null=False)
-    payments_currency = models.IntegerField(default=3, null=False)
+    currency_type = models.CharField(max_length=3, default="CNY", null=False)
+    payments_currency = models.CharField(max_length=3, default="CNY", null=False)
     status = models.IntegerField(default=0, null=False)
 
 

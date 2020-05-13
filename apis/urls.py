@@ -28,6 +28,7 @@ urlpatterns = [
 
     path('user/expenses', expense.expenseSave),
     path('user/expenses/count', expense.expenseCount),
+    path('user/expenses/recent_currencies', expense.recentCurrencies),
     path('user/expenses/<int:pk>', expense.expenseUpdate),
     path('user/expenses/change_status', expense.expenseChangeStatus),
     path('user/expenses/upload_file', AttachmentUploadView.as_view()),
