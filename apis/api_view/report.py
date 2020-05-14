@@ -57,8 +57,6 @@ def getReportData(reports, totals, wants_currency):
 
     return reports
 
-
-
 def reportList(request):
     reportData = []
     userId = request.query_params.get('user_id')
