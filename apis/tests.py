@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 594bf43561c7f12609ac434226605599ab49b068
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory
 import requests
