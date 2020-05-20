@@ -36,7 +36,7 @@ class UnitTestCase(TestCase):
         self.assertEqual(responseBody['success'], True)
 
     def test_api_reports_delete(self):
-        id = '252'
+        id = '253'
 
         headers = {'uid': 'test01@outlook.com', 'access-token': access_token, 'client': client_key}
 
